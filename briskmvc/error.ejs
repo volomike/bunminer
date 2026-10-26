@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"
+integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
+crossorigin="anonymous"></script>
+<style>
+
+*
+{
+box-sizing:border-box;
+font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", Segoe UI Symbol;
+color:#444;
+font-size:16px;
+}
+
+SECTION
+{
+margin: 10px auto;
+margin-top: 20px;
+padding:0;
+border: 1px solid #DDD;
+box-shadow: 2px 2px 15px 5px rgb(0 0 0 / 10%);
+border-radius: 10px;
+display:block;
+width:98%;
+overflow:hidden;
+}
+
+XHEAD
+{
+display:block;
+width:100%;
+overflow:hidden;
+border-bottom:2px groove rgba(0,0,0,0.1);
+padding:10px;
+padding-top:15px;
+padding-bottom:15px;
+line-height:20px;
+font-weight:bold;
+height:50px;
+}
+
+XFOOT
+{
+display:block;
+width:100%;
+overflow:hidden;
+border-top:2px groove rgba(0,0,0,0.1);
+padding:10px;
+padding-top:0px;
+padding-bottom:0px;
+line-height:20px;
+font-weight:bold;
+height:50px;
+line-height:50px;
+}
+
+XBODY
+{
+padding:10px;
+display:block;
+width:100%;
+overflow:hidden;
+min-height:50vh;
+}
+
+XHEAD *
+{
+float:left;
+clear:right;
+}
+
+XWARN
+{
+content:url('data:image/svg+xml,%3C%3Fxml%20version%3D%221.0%22%20encoding%3D%22UTF-8%22%3F%3E%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2220%22%20height%3D%2220%22%3E%3Cstyle%3E*%7Bfill%3A%23d33%7D%3C%2Fstyle%3E%3Cpath%20d%3D%22M19.64%2016.36%2011.53%202.3A1.85%201.85%200%200%200%2010%201.21%201.85%201.85%200%200%200%208.48%202.3L.36%2016.36C-.48%2017.81.21%2019%201.88%2019h16.24c1.67%200%202.36-1.19%201.52-2.64M11%2016H9v-2h2zm0-4H9V6h2z%22%2F%3E%3C%2Fsvg%3E');
+width: 20px;
+height: 20px;
+margin-right: 6px;
+display: block;
+}
+
+XCOPY
+{
+content: url('data:image/svg+xml,%3Csvg width="24" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"%3E%3Cpath fill="%23656565" d="M502.6 70.63l-61.25-61.25C435.4 3.371 427.2 0 418.7 0H255.1c-35.35 0-64 28.66-64 64l.0195 256C192 355.4 220.7 384 256 384h192c35.2 0 64-28.8 64-64V93.25C512 84.77 508.6 76.63 502.6 70.63zM464 320c0 8.836-7.164 16-16 16H255.1c-8.838 0-16-7.164-16-16L239.1 64.13c0-8.836 7.164-16 16-16h128L384 96c0 17.67 14.33 32 32 32h47.1V320zM272 448c0 8.836-7.164 16-16 16H63.1c-8.838 0-16-7.164-16-16L47.98 192.1c0-8.836 7.164-16 16-16H160V128H63.99c-35.35 0-64 28.65-64 64l.0098 256C.002 483.3 28.66 512 64 512h192c35.2 0 64-28.8 64-64v-32h-47.1L272 448z"%3E%3C/path%3E%3C/svg%3E');
+width: 17px;
+height: 17px;
+margin-right: 6px;
+display: inline-block;
+float:unset !important;
+clear:unset !important;
+position:relative;
+top:2px;
+}
+
+XBODY XERRCODE
+{
+display:block;
+font-weight:bold;
+color:#a5a5a5;
+}
+
+XBODY XERRMSG
+{
+display:block;
+color: #e33737;
+font-size: 16pt;
+font-weight: 700;
+}
+
+XBODY PRE
+{
+font-family:ui-monospace, Menlo, Monaco, "Cascadia Mono", "Segoe UI Mono", "Roboto Mono", "Oxygen Mono", "Ubuntu Monospace", "Source Code Pro", "Fira Mono", "Droid Sans Mono", "Courier New", monospace;
+font-size:13px;
+}
+
+XFOOT *
+{
+float:left;
+clear:right;
+}
+
+XFOOT XBTN
+{
+text-align:center;
+display:inline-block;
+width:140px;
+border-right:2px groove rgba(0,0,0,0.1);
+padding-right:13px;
+cursor:pointer;
+user-select:none;
+}
+
+XFOOT XBTN *
+{
+float:unset !important;
+clear:unset !important;
+}
+
+XFOOT XBTN:hover
+{
+background: #333;
+color:#FFF !important;
+border-radius: 6px;
+}
+
+XFOOT XBTN:hover SPAN
+{
+color:#FFF !important;
+}
+
+XFOOT XBTN:active
+{
+background: #444;
+}
+
+XFOOT XBTN:active SPAN
+{
+color:#FFF !important;
+}
+
+XFOOT XPOWERED
+{
+display:inline-block;
+float:right;
+}
+
+</style>
+</head>
+<body>
+
+<% if (VIEW.NAME !== 'DUMP') { %>
+<section>
+<xhead><xwarn></xwarn> <%= VIEW.NAME %></xhead>
+<xbody>
+<xerrcode>HTTP <%= VIEW.STATUS %></xerrcode>
+<xerrmsg><%= VIEW.MESSAGE %></xerrmsg>
+<% if (VIEW.FULL) { %>
+<pre>
+<%= VIEW.STACK %>
+</pre>
+<% } %>
+<xurl><%= VIEW.URL %></xurl>
+</xbody>
+<xfoot><xbtn><xcopy></xcopy> <span>Copy Error</span></xbtn> <xpowered>Powered by BriskMVC</xpowered></xfoot>
+</section>
+<% } %>
+
+<% if (VIEW.NAME === 'DUMP') { %>
+<section>
+<xhead><xwarn></xwarn> VARIABLE OUTPUT</xhead>
+<xbody>
+<pre>
+<%= VIEW.MESSAGE %>
+</pre>
+</xbody>
+<xfoot><xbtn><xcopy></xcopy> <span>Copy</span></xbtn> <xpowered>Powered by BriskMVC</xpowered></xfoot>
+</section>
+<% } %>
+
+<script>
+
+// Function to handle the copy action
+function copyTextToClipboard(textToCopy) {
+    var sExistingBtnText = '';
+    try {
+        sExistingBtnText = $('XBTN SPAN').text();
+        var blob = new Blob([textToCopy], {type: 'text/plain'});
+        var item = new ClipboardItem({'text/plain': blob});
+        navigator.clipboard.write([item]);
+        
+        $('XBTN').prop('disabled',true);
+        $('XBTN SPAN').text('Copied!');
+        console.log('Text copied:', textToCopy);
+
+        setTimeout(() => {
+            $('XBTN').prop('disabled',false);
+            $('XBTN SPAN').text(sExistingBtnText);
+        }, 3000);
+
+    } catch (err) {
+        $('XBTN').prop('disabled',false);
+        $('XBTN SPAN').text(sExistingBtnText);
+        console.error('Could not copy text: ', err);
+    }
+}
+
+
+$(document).ready(function(){
+
+	$('XBTN').click(function(e){
+		e.preventDefault();
+let err = ("<%= VIEW.NAME %>" === 'DUMP') ? 
+`
+<%= VIEW.MESSAGE %>
+` :
+`
+NAME: <%= VIEW.NAME %>
+STATUS: HTTP <%= VIEW.STATUS %>
+MESSAGE: <%= VIEW.MESSAGE %>
+URL: <%= VIEW.URL %>
+STACK: <%= (VIEW.FULL) ? VIEW.STACK : '' %>
+`;
+		console.log(err);
+		copyTextToClipboard(err);
+		return false;
+	});
+
+});
+
+</script>
+
+</body>
+</html>
+
+

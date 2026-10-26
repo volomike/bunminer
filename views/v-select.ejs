@@ -1,0 +1,79 @@
+<%- await include('v-HEAD.ejs'); %>
+<% var isPg = VIEW.session.engine === 'pgsql'; var isSqlite = VIEW.session.engine === 'sqlite'; %>
+<h2>Select: <%= VIEW.table %></h2>
+
+<form method="get" action="/select" class="form-inline mb-3">
+  <% if (!isSqlite) { %><input type="hidden" name="db" value="<%= VIEW.db %>"><% } %>
+  <% if (isPg) { %><input type="hidden" name="schema" value="<%= VIEW.schema %>"><% } %>
+  <input type="hidden" name="table" value="<%= VIEW.table %>">
+  <input type="text" name="where" class="form-control form-control-sm mr-2" placeholder="WHERE" value="<%= VIEW.where %>">
+  <input type="text" name="order" class="form-control form-control-sm mr-2" placeholder="ORDER BY" value="<%= VIEW.order %>">
+  <select name="limit" class="form-control form-control-sm mr-2">
+    <% VIEW.limitOptions.forEach(n => { %><option value="<%= n %>" <%= VIEW.limit===n?'selected':'' %>><%= n %></option><% }) %>
+  </select>
+  <button class="btn btn-sm btn-outline-secondary">Apply</button>
+  <a class="btn btn-sm btn-outline-secondary" href="<%= VIEW.q('/insert', { db: VIEW.db, table: VIEW.table, schema: VIEW.schema }) %>">New item</a>
+</form>
+
+<form id="bulk-form" method="post" action="/select-action" class="mb-2">
+  <input type="hidden" name="csrf" value="<%= VIEW.session.csrf %>">
+  <% if (!isSqlite) { %><input type="hidden" name="db" value="<%= VIEW.db %>"><% } %>
+  <% if (isPg) { %><input type="hidden" name="schema" value="<%= VIEW.schema %>"><% } %>
+  <input type="hidden" name="table" value="<%= VIEW.table %>">
+  <input type="hidden" name="rows" id="bulk-rows">
+  <input type="hidden" id="sel-key" value="<%= VIEW.selKey %>">
+  <label class="mr-2">With Selected Items:</label>
+  <select name="action" id="bulk-action" class="form-control form-control-sm d-inline-block mr-2" style="width:auto">
+    <option value="delete">Delete</option>
+    <option value="export">Export</option>
+  </select>
+  <button type="submit" class="btn btn-sm btn-danger">Do</button>
+  <span id="sel-count" class="dim ml-2"></span>
+</form>
+
+<div class="table-responsive"><table class="adminer-table">
+  <thead>
+    <tr>
+      <th><input type="checkbox" class="select-all-page"></th>
+      <th></th>
+      <% VIEW.columns.forEach(c => { %><th><%= c %></th><% }) %>
+    </tr>
+  </thead>
+  <tbody>
+  <% if (!VIEW.rows.length) { %><tr><td colspan="<%= VIEW.columns.length + 2 %>" class="dim">No rows</td></tr><% } %>
+  <% VIEW.rows.forEach(r => { %>
+    <tr>
+      <td>
+        <% if (r.selectable) { %><input type="checkbox" class="row-sel" data-key="<%= r.key %>"><% } %>
+      </td>
+      <td>
+        <% if (r.editUrl) { %><a href="<%= r.editUrl %>">edit</a><% } %>
+      </td>
+      <% r.cells.forEach(c => { %>
+        <td>
+          <% if (c.kind === 'null') { %><i class="null">NULL</i>
+          <% } else if (c.kind === 'blob') { %><span class="dim">blob (<%= c.bytes %> B)</span>
+          <% } else if (c.kind === 'json') { %>
+            <% if (c.text.length > 40) { %><code class="cell-trunc" title="<%= c.text %>"><%= c.text %></code>
+            <% } else { %><code><%= c.text %></code><% } %>
+          <% } else { %>
+            <% if (c.text.length > 40) { %><span class="cell-trunc" title="<%= c.text %>"><%= c.text %></span>
+            <% } else { %><%= c.text %><% } %>
+          <% } %>
+        </td>
+      <% }) %>
+    </tr>
+  <% }) %>
+  </tbody>
+</table></div>
+
+<div class="pagination">
+  <% if (VIEW.offset > 0) { %>
+    <a href="<%= VIEW.q('/select', { db: VIEW.db, table: VIEW.table, schema: VIEW.schema, where: VIEW.where, order: VIEW.order, limit: VIEW.limit, offset: Math.max(0, VIEW.offset - VIEW.limit) }) %>">prev</a>
+  <% } %>
+  <span>rows <%= VIEW.offset + 1 %>–<%= Math.min(VIEW.offset + VIEW.limit, VIEW.total) %> of <%= VIEW.total %></span>
+  <% if (VIEW.offset + VIEW.limit < VIEW.total) { %>
+    <a href="<%= VIEW.q('/select', { db: VIEW.db, table: VIEW.table, schema: VIEW.schema, where: VIEW.where, order: VIEW.order, limit: VIEW.limit, offset: VIEW.offset + VIEW.limit }) %>">next</a>
+  <% } %>
+</div>
+<%- await include('v-FOOT.ejs'); %>

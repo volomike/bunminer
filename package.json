@@ -1,0 +1,21 @@
+{
+  "name": "bundb-panel",
+  "description": "BunDB Panel — a database manager in BunJS (with a nod to Adminer)",
+  "version": "0.1.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "start": "bun run server.js",
+    "dev": "bun run --watch server.js",
+    "dev-hot": "bun run --hot server.js"
+  },
+  "dependencies": {
+    "@elysiajs/static": "^1.4.10",
+    "@sinclair/typebox": "^0.34.49",
+    "ejs": "^4.0.1",
+    "elysia": "^1.4.28",
+    "hjson": "^3.2.2",
+    "mysql2": "^3.24.6",
+    "pg": "^8.23.1"
+  }
+}

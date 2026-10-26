@@ -1,0 +1,12 @@
+<%- await include('v-HEAD.ejs'); %>
+<h2><%= VIEW.kind === 'status' ? 'Status' : 'Variables' %></h2>
+<input type="text" id="filter" class="form-control mb-2" placeholder="Filter" style="max-width:400px">
+<table class="adminer-table" id="vars">
+  <thead><tr><th>Name</th><th>Value</th></tr></thead>
+  <tbody>
+  <% VIEW.rows.forEach(r => { %>
+    <tr><td><%= r.name %></td><td><%= r.value === null || r.value === undefined ? 'NULL' : r.value %></td></tr>
+  <% }) %>
+  </tbody>
+</table>
+<%- await include('v-FOOT.ejs'); %>

@@ -1,0 +1,26 @@
+<%- await include('v-HEAD.ejs'); %>
+<% var isPg = VIEW.session.engine === 'pgsql'; var isSqlite = VIEW.session.engine === 'sqlite'; %>
+<h2>Export</h2>
+
+<form method="post" action="/export">
+  <input type="hidden" name="csrf" value="<%= VIEW.session.csrf %>">
+  <% if (!isSqlite) { %><input type="hidden" name="db" value="<%= VIEW.db %>"><% } %>
+  <% if (isPg) { %><input type="hidden" name="schema" value="<%= VIEW.schema %>"><% } %>
+
+  <% if (!isSqlite) { %>
+  <h3>Tables</h3>
+  <table class="adminer-table">
+    <tbody>
+    <% VIEW.tables.forEach(t => { %>
+      <tr><td><label class="mb-0"><input type="checkbox" name="t[<%= t.name %>]" value="1"> <%= t.name %></label></td></tr>
+    <% }) %>
+    </tbody>
+  </table>
+  <% } %>
+
+  <div class="form-check"><input type="checkbox" name="structure" value="1" class="form-check-input" id="structure"><label class="form-check-label" for="structure">Structure</label></div>
+  <div class="form-check"><input type="checkbox" name="data" value="1" class="form-check-input" id="data"><label class="form-check-label" for="data">Data</label></div>
+  <div class="form-check"><input type="checkbox" name="gzip" value="1" class="form-check-input" id="gzip" checked><label class="form-check-label" for="gzip">gzip</label></div>
+  <button type="submit" class="btn btn-sm btn-primary">Download</button>
+</form>
+<%- await include('v-FOOT.ejs'); %>

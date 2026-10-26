@@ -1,0 +1,35 @@
+<%- await include('v-HEAD.ejs'); %>
+<% var isPg = VIEW.session.engine === 'pgsql'; var isSqlite = VIEW.session.engine === 'sqlite'; %>
+<h2><%= VIEW.mode === 'edit' ? 'Edit' : 'New item' %>: <%= VIEW.table %></h2>
+
+<form method="post" action="<%= VIEW.mode === 'edit' ? '/edit' : '/insert' %>">
+  <input type="hidden" name="csrf" value="<%= VIEW.session.csrf %>">
+  <% if (!isSqlite) { %><input type="hidden" name="db" value="<%= VIEW.db %>"><% } %>
+  <% if (isPg) { %><input type="hidden" name="schema" value="<%= VIEW.schema %>"><% } %>
+  <input type="hidden" name="table" value="<%= VIEW.table %>">
+  <% if (VIEW.mode === 'edit' && VIEW.pk) { VIEW.pk.forEach(p => { %><input type="hidden" name="pk[<%= p.col %>]" value="<%= p.val %>"><% }) } %>
+
+  <table class="adminer-table">
+    <thead><tr><th>Column</th><th>Type</th><th>Value</th></tr></thead>
+    <tbody>
+    <% if (!VIEW.fields.length) { %><tr><td colspan="3" class="dim">No editable columns</td></tr><% } %>
+    <% VIEW.fields.forEach(f => { %>
+      <tr>
+        <td><%= f.name %></td>
+        <td class="dim"><%= f.type %></td>
+        <td>
+          <% if (f.long) { %>
+            <textarea name="f[<%= f.name %>]" class="form-control" rows="3"><%= f.value %></textarea>
+          <% } else { %>
+            <input type="text" name="f[<%= f.name %>]" class="form-control" value="<%= f.value %>">
+          <% } %>
+        </td>
+      </tr>
+    <% }) %>
+    </tbody>
+  </table>
+
+  <button type="submit" class="btn btn-sm btn-primary">Save</button>
+  <a class="btn btn-sm btn-outline-secondary" href="<%= VIEW.q('/select', { db: VIEW.db, table: VIEW.table, schema: VIEW.schema }) %>">Cancel</a>
+</form>
+<%- await include('v-FOOT.ejs'); %>
