@@ -29,7 +29,9 @@ a:visited { color: var(--accent); }
 
 .adminer-table { border-collapse:collapse; width:100%; margin-bottom:12px; font-size:13px; background:#fff; }
 .adminer-table th, .adminer-table td { border:1px solid var(--border); padding:3px 7px; text-align:left; vertical-align:top; }
-.adminer-table th { background:var(--head); font-weight:bold; }
+.adminer-table th { background:var(--head); font-weight:bold; font-size:12px; }
+.adminer-table th a.col-sort { display:flex; align-items:center; justify-content:space-between; gap:10px; padding-right:6px; cursor:pointer; }
+.adminer-table th .sort-caret { font-size:9px; color:var(--muted); }
 .adminer-table td { font-family: Consolas, Menlo, "SF Mono", "Ubuntu Sans Mono", "Ubuntu Mono", "DejaVu Sans Mono", monospace; font-size:12px; line-height:1.4; white-space:nowrap; }
 .adminer-table td a, .adminer-table td .btn-link { font-family: Verdana, Arial, Helvetica, sans-serif; font-size:13px; }
 .adminer-table td code, .adminer-table td pre { font-size:12px; }
