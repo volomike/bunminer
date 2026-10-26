@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><%= VIEW.title %> - BunDB Panel</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/assets/css/adminer-theme.css?r=<%= VIEW.RANDOMID %>">
+  <link rel="stylesheet" href="/assets/js/dialog/dialog.css?r=<%= VIEW.RANDOMID %>">
+  <link rel="icon" type="image/png" href="/assets/img/bundbpanel.png">
+</head>
+<body>
+<header class="adminer-header">
+  <h1>BunDB Panel <small>v<%= VIEW.CORDOVA_VERSION %></small></h1>
+  <div class="adminer-user">
+    <% if (VIEW.session) { %>
+      <span><%= VIEW.session.engine %> · <%= VIEW.session.username || 'sqlite' %></span>
+    <% } %>
+  </div>
+</header>
+<nav class="adminer-menu">
+  <% if (VIEW.db) { %><span class="adminer-db"><%= VIEW.db %></span><% } %>
+  <a href="<%= VIEW.q('/server', {}) %>">Server</a>
+  <% if (VIEW.db) { %>
+    <a href="<%= VIEW.q('/db', { db: VIEW.db, schema: VIEW.schema }) %>">Database</a>
+    <a href="<%= VIEW.q('/sql', { db: VIEW.db, schema: VIEW.schema }) %>">SQL command</a>
+    <a href="<%= VIEW.q('/import', { db: VIEW.db, schema: VIEW.schema }) %>">Import</a>
+    <a href="<%= VIEW.q('/export', { db: VIEW.db, schema: VIEW.schema }) %>">Export</a>
+  <% } %>
+  <% if (VIEW.table) { %>
+    <a href="<%= VIEW.q('/table', { db: VIEW.db, table: VIEW.table, schema: VIEW.schema }) %>">Structure</a>
+    <a href="<%= VIEW.q('/select', { db: VIEW.db, table: VIEW.table, schema: VIEW.schema }) %>">Select</a>
+    <a href="<%= VIEW.q('/insert', { db: VIEW.db, table: VIEW.table, schema: VIEW.schema }) %>">New item</a>
+  <% } %>
+  <% if (VIEW.session && (VIEW.session.engine === 'maria' || VIEW.session.engine === 'pgsql')) { %>
+    <a href="/processlist">Process list</a>
+    <a href="/variables">Variables</a>
+    <a href="/status">Status</a>
+    <a href="/privileges">Privileges</a>
+  <% } %>
+  <a href="/history">History</a>
+  <a href="/logout" class="right">Logout</a>
+</nav>
+<div class="adminer-content">
+<% if (VIEW.error) { %><div class="adminer-error"><%= VIEW.error %></div><% } %>

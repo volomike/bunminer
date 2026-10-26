@@ -1,0 +1,67 @@
+<%- await include('v-HEAD.ejs'); %>
+<% var isMar = VIEW.session.engine === 'maria'; %>
+<h2>Create table</h2>
+
+<form method="post" action="/create">
+  <input type="hidden" name="csrf" value="<%= VIEW.session.csrf %>">
+  <% if (VIEW.session.engine !== 'sqlite') { %><input type="hidden" name="db" value="<%= VIEW.db %>"><% } %>
+  <% if (VIEW.session.engine === 'pgsql') { %><input type="hidden" name="schema" value="<%= VIEW.schema %>"><% } %>
+
+  <div class="form-inline mb-3">
+    <label class="mr-2">Table name</label>
+    <input type="text" name="name" class="form-control form-control-sm mr-3" required pattern="[A-Za-z_][A-Za-z0-9_]*" title="letters, digits and underscores" autofocus>
+    <% if (isMar) { %>
+      <label class="mr-2">Engine</label>
+      <select name="engine" class="form-control form-control-sm">
+        <% ['InnoDB', 'Aria', 'MyISAM'].forEach(e => { %><option value="<%= e %>"><%= e %></option><% }) %>
+      </select>
+    <% } %>
+  </div>
+
+  <table class="adminer-table">
+    <thead><tr>
+      <th>Name</th><th>Type</th><th>Length</th>
+      <% if (isMar) { %><th>UN</th><th>AI</th><% } %>
+      <th>Null</th><th>Default</th><th></th>
+    </tr></thead>
+    <tbody id="cols-rows">
+      <tr data-col>
+        <td><input type="text" name="c[0][name]" class="form-control form-control-sm" style="width:140px"></td>
+        <td><input type="text" name="c[0][type]" class="form-control form-control-sm" list="types" style="width:150px"></td>
+        <td><input type="text" name="c[0][length]" class="form-control form-control-sm" style="width:70px"></td>
+        <% if (isMar) { %>
+          <td><input type="checkbox" name="c[0][unsigned]" value="1"></td>
+          <td><input type="checkbox" name="c[0][ai]" value="1"></td>
+        <% } %>
+        <td><input type="checkbox" name="c[0][null]" value="1" checked></td>
+        <td><input type="text" name="c[0][def]" class="form-control form-control-sm" style="width:150px"></td>
+        <td><button type="button" class="btn btn-sm btn-outline-secondary col-del">×</button></td>
+      </tr>
+    </tbody>
+  </table>
+  <button type="button" id="add-col" class="btn btn-sm btn-outline-secondary mb-3">Add column</button>
+
+  <datalist id="types">
+    <% VIEW.types.forEach(t => { %><option value="<%= t %>"></option><% }) %>
+  </datalist>
+
+  <div>
+    <button type="submit" class="btn btn-sm btn-primary">Create table</button>
+  </div>
+</form>
+
+<script type="text/template" id="col-row-tpl">
+  <tr data-col>
+    <td><input type="text" name="c[__IDX__][name]" class="form-control form-control-sm" style="width:140px"></td>
+    <td><input type="text" name="c[__IDX__][type]" class="form-control form-control-sm" list="types" style="width:150px"></td>
+    <td><input type="text" name="c[__IDX__][length]" class="form-control form-control-sm" style="width:70px"></td>
+    <% if (isMar) { %>
+      <td><input type="checkbox" name="c[__IDX__][unsigned]" value="1"></td>
+      <td><input type="checkbox" name="c[__IDX__][ai]" value="1"></td>
+    <% } %>
+    <td><input type="checkbox" name="c[__IDX__][null]" value="1" checked></td>
+    <td><input type="text" name="c[__IDX__][def]" class="form-control form-control-sm" style="width:150px"></td>
+    <td><button type="button" class="btn btn-sm btn-outline-secondary col-del">×</button></td>
+  </tr>
+</script>
+<%- await include('v-FOOT.ejs'); %>

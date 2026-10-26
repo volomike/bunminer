@@ -1,0 +1,52 @@
+<%- await include('v-HEAD.ejs'); %>
+<% var isMar = VIEW.session.engine === 'maria'; var isPg = VIEW.session.engine === 'pgsql'; var isSqlite = VIEW.session.engine === 'sqlite'; %>
+<% var sqliteEdit = isSqlite && !VIEW.isNew; %>
+<h2><%= VIEW.isNew ? 'Add column' : 'Edit column' %>: <%= VIEW.table %></h2>
+
+<% if (VIEW.col) { %>
+  <% if (sqliteEdit) { %>
+    <div class="adminer-msg">SQLite can only rename a column here — changing its type or nullability requires dropping and re-adding it.</div>
+  <% } %>
+  <% if (!VIEW.isNew && VIEW.col.serial) { %>
+    <div class="adminer-msg">This column has an auto-generated default (serial/identity). Editing its type or default may break it.</div>
+  <% } %>
+  <form method="post" action="/alter-column">
+    <input type="hidden" name="csrf" value="<%= VIEW.session.csrf %>">
+    <% if (!isSqlite) { %><input type="hidden" name="db" value="<%= VIEW.db %>"><% } %>
+    <% if (isPg) { %><input type="hidden" name="schema" value="<%= VIEW.schema %>"><% } %>
+    <input type="hidden" name="table" value="<%= VIEW.table %>">
+    <input type="hidden" name="action" value="<%= VIEW.isNew ? 'add' : 'edit' %>">
+    <% if (!VIEW.isNew) { %><input type="hidden" name="column" value="<%= VIEW.col.name %>"><% } %>
+
+    <div class="form-inline mb-3">
+      <label class="mr-2">Name</label>
+      <input type="text" name="name" class="form-control form-control-sm" value="<%= VIEW.col.name %>" required style="width:200px">
+    </div>
+
+    <% if (!sqliteEdit) { %>
+    <div class="form-inline mb-3">
+      <label class="mr-2">Type</label>
+      <input type="text" name="type" class="form-control form-control-sm mr-3" value="<%= VIEW.col.type %>" list="types" style="width:180px">
+      <label class="mr-2">Length</label>
+      <input type="text" name="length" class="form-control form-control-sm mr-3" value="<%= VIEW.col.length %>" style="width:80px">
+      <% if (isMar) { %>
+        <label class="mr-2"><input type="checkbox" name="unsigned" value="1" <%= VIEW.col.unsigned ? 'checked' : '' %>> unsigned</label>
+        <label class="mr-2"><input type="checkbox" name="ai" value="1" <%= VIEW.col.autoInc ? 'checked' : '' %>> auto-increment</label>
+      <% } %>
+      <label class="mr-2"><input type="checkbox" name="null" value="1" <%= VIEW.col.nullable ? 'checked' : '' %>> nullable</label>
+    </div>
+    <div class="form-inline mb-3">
+      <label class="mr-2">Default</label>
+      <input type="text" name="def" class="form-control form-control-sm" value="<%= VIEW.col.def %>" style="width:200px">
+    </div>
+    <% } %>
+
+    <datalist id="types">
+      <% VIEW.types.forEach(t => { %><option value="<%= t %>"></option><% }) %>
+    </datalist>
+
+    <button type="submit" class="btn btn-sm btn-primary">Save</button>
+    <a class="btn btn-sm btn-outline-secondary" href="<%= VIEW.q('/table', { db: VIEW.db, table: VIEW.table, schema: VIEW.schema }) %>">Cancel</a>
+  </form>
+<% } %>
+<%- await include('v-FOOT.ejs'); %>

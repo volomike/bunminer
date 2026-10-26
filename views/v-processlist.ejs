@@ -1,0 +1,23 @@
+<%- await include('v-HEAD.ejs'); %>
+<h2>Process list</h2>
+<div class="table-responsive"><table class="adminer-table">
+  <thead><tr><th></th><% VIEW.columns.forEach(c => { %><th><%= c %></th><% }) %></tr></thead>
+  <tbody>
+  <% if (!VIEW.rows.length) { %><tr><td colspan="<%= VIEW.columns.length + 1 %>" class="dim">No processes</td></tr><% } %>
+  <% VIEW.rows.forEach(r => { const id = r.Id !== undefined ? r.Id : r.pid; %>
+    <tr>
+      <td>
+        <% if (id !== undefined) { %>
+          <form method="post" action="/processlist" class="d-inline">
+            <input type="hidden" name="csrf" value="<%= VIEW.session.csrf %>">
+            <input type="hidden" name="id" value="<%= id %>">
+            <button type="button" class="btn btn-link btn-sm p-0" data-confirm="Kill process <%= id %>?">kill</button>
+          </form>
+        <% } %>
+      </td>
+      <% VIEW.columns.forEach(c => { %><td><%= r[c] === null || r[c] === undefined ? 'NULL' : r[c] %></td><% }) %>
+    </tr>
+  <% }) %>
+  </tbody>
+</table></div>
+<%- await include('v-FOOT.ejs'); %>

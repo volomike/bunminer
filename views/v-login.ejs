@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Login - BunDB Panel</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/assets/css/adminer-theme.css?r=<%= VIEW.RANDOMID %>">
+  <link rel="icon" type="image/png" href="/assets/img/bundbpanel.png">
+</head>
+<body class="login-page">
+  <div class="login-box">
+    <h1 class="login-logo">BunDB Panel</h1>
+    <% if (VIEW.error) { %><div class="adminer-error"><%= VIEW.error %></div><% } %>
+    <form method="post" action="/login">
+      <div class="form-group">
+        <label for="driver">System</label>
+        <select name="driver" id="driver" class="form-control">
+          <% VIEW.servers.forEach(sv => { %>
+            <option value="<%= sv.id %>" <%= sv.id === VIEW.driver ? 'selected' : '' %>><%= sv.label %></option>
+          <% }) %>
+        </select>
+      </div>
+      <div class="form-group" id="fld-server">
+        <label>Server</label>
+        <input type="text" name="server" class="form-control" value="" placeholder="localhost" autocomplete="off">
+      </div>
+      <div class="form-group" id="fld-username">
+        <label for="username">Username</label>
+        <input type="text" name="username" id="username" class="form-control" value="<%= VIEW.username || '' %>" autocomplete="username" autofocus>
+      </div>
+      <div class="form-group" id="fld-password">
+        <label for="password">Password</label>
+        <input type="password" name="password" id="password" class="form-control" autocomplete="current-password">
+      </div>
+      <div class="form-group" id="fld-db">
+        <label for="db">Database <span class="dim">(optional)</span></label>
+        <input type="text" name="db" id="db" class="form-control" value="<%= VIEW.db || '' %>">
+      </div>
+      <div class="form-check mb-3">
+        <input type="checkbox" name="permanent" value="1" class="form-check-input" id="permanent">
+        <label class="form-check-label" for="permanent">Permanent login</label>
+      </div>
+      <div class="hp-field" aria-hidden="true">
+        <label for="website">Website</label>
+        <input type="text" name="website" id="website" tabindex="-1" autocomplete="off">
+      </div>
+      <button type="submit" class="btn btn-primary btn-block">Login</button>
+    </form>
+  </div>
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="/assets/js/site.js?r=<%= VIEW.RANDOMID %>"></script>
+</body>
+</html>

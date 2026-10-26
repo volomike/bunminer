@@ -1,0 +1,104 @@
+<%- await include('v-HEAD.ejs'); %>
+<% var isMar = VIEW.engine === 'maria'; %>
+<h2>Privileges</h2>
+
+<% if (VIEW.grants !== undefined) { %>
+<h3>Grants for <%= VIEW.grantTarget %></h3>
+<ul>
+<% (Array.isArray(VIEW.grants) ? VIEW.grants : []).forEach(g => { %><li><code><%= typeof g === 'string' ? g : JSON.stringify(g) %></code></li><% }) %>
+</ul>
+<a href="/privileges">Back to users</a>
+<% } else { %>
+
+<table class="adminer-table">
+  <thead>
+    <tr>
+      <% if (isMar) { %><th>User</th><th>Host</th><th>Plugin</th><% } else { %><th>Role</th><th>Super</th><th>Createdb</th><th>Createrole</th><th>Login</th><% } %>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+  <% VIEW.users.forEach(u => { %>
+    <tr>
+      <% if (isMar) { %>
+        <td><%= u.user %></td><td><%= u.host %></td><td class="dim"><%= u.plugin %></td>
+        <td>
+          <a href="<%= VIEW.q('/privileges', { show: 'grants', user: u.user, host: u.host }) %>">grants</a>
+          <form method="post" action="/privileges" class="d-inline">
+            <input type="hidden" name="csrf" value="<%= VIEW.session.csrf %>">
+            <input type="hidden" name="action" value="drop-user">
+            <input type="hidden" name="user" value="<%= u.user %>">
+            <input type="hidden" name="host" value="<%= u.host %>">
+            <button type="button" class="btn btn-link btn-sm p-0" data-confirm="Drop user <%= u.user %>@<%= u.host %>?">drop</button>
+          </form>
+        </td>
+      <% } else { %>
+        <td><%= u.name %></td><td><%= u.rolsuper ? 'yes' : '' %></td><td><%= u.rolcreatedb ? 'yes' : '' %></td><td><%= u.rolcreaterole ? 'yes' : '' %></td><td><%= u.rolcanlogin ? 'yes' : '' %></td>
+        <td>
+          <a href="<%= VIEW.q('/privileges', { show: 'grants', role: u.name }) %>">grants</a>
+          <form method="post" action="/privileges" class="d-inline">
+            <input type="hidden" name="csrf" value="<%= VIEW.session.csrf %>">
+            <input type="hidden" name="action" value="drop-role">
+            <input type="hidden" name="name" value="<%= u.name %>">
+            <button type="button" class="btn btn-link btn-sm p-0" data-confirm="Drop role <%= u.name %>?">drop</button>
+          </form>
+        </td>
+      <% } %>
+    </tr>
+  <% }) %>
+  </tbody>
+</table>
+
+<% if (isMar) { %>
+<h3>Create user</h3>
+<form method="post" action="/privileges" class="form-inline mb-3">
+  <input type="hidden" name="csrf" value="<%= VIEW.session.csrf %>">
+  <input type="hidden" name="action" value="create-user">
+  <input type="text" name="user" class="form-control form-control-sm mr-2" placeholder="username" required>
+  <input type="text" name="host" class="form-control form-control-sm mr-2" placeholder="host (localhost or %)" required>
+  <input type="password" name="pass" class="form-control form-control-sm mr-2" placeholder="password" required>
+  <button class="btn btn-sm btn-primary">Create</button>
+</form>
+<h3>Grant / revoke</h3>
+<form method="post" action="/privileges" class="form-inline mb-3">
+  <input type="hidden" name="csrf" value="<%= VIEW.session.csrf %>">
+  <select name="action" class="form-control form-control-sm mr-2"><option value="grant">GRANT</option><option value="revoke">REVOKE</option></select>
+  <input type="text" name="user" class="form-control form-control-sm mr-2" placeholder="user" required>
+  <input type="text" name="host" class="form-control form-control-sm mr-2" placeholder="host" required>
+  <input type="text" name="privs" class="form-control form-control-sm mr-2" placeholder="ALL PRIVILEGES / SELECT, INSERT" required>
+  <input type="text" name="scope" class="form-control form-control-sm mr-2" placeholder="*.* / db.* / db.table" required>
+  <button class="btn btn-sm btn-primary">Run</button>
+</form>
+<h3>Set password</h3>
+<form method="post" action="/privileges" class="form-inline mb-3">
+  <input type="hidden" name="csrf" value="<%= VIEW.session.csrf %>">
+  <input type="hidden" name="action" value="set-password">
+  <input type="text" name="user" class="form-control form-control-sm mr-2" placeholder="user" required>
+  <input type="text" name="host" class="form-control form-control-sm mr-2" placeholder="host" required>
+  <input type="password" name="pass" class="form-control form-control-sm mr-2" placeholder="new password" required>
+  <button class="btn btn-sm btn-primary">Set</button>
+</form>
+<% } else { %>
+<h3>Create role</h3>
+<form method="post" action="/privileges" class="form-inline mb-3">
+  <input type="hidden" name="csrf" value="<%= VIEW.session.csrf %>">
+  <input type="hidden" name="action" value="create-role">
+  <input type="text" name="name" class="form-control form-control-sm mr-2" placeholder="role name" required>
+  <input type="password" name="pass" class="form-control form-control-sm mr-2" placeholder="password">
+  <label class="mr-2"><input type="checkbox" name="login" value="1" checked> login</label>
+  <label class="mr-2"><input type="checkbox" name="superuser" value="1"> superuser</label>
+  <label class="mr-2"><input type="checkbox" name="createdb" value="1"> createdb</label>
+  <button class="btn btn-sm btn-primary">Create</button>
+</form>
+<h3>Grant / revoke</h3>
+<form method="post" action="/privileges" class="form-inline mb-3">
+  <input type="hidden" name="csrf" value="<%= VIEW.session.csrf %>">
+  <select name="action" class="form-control form-control-sm mr-2"><option value="grant">GRANT</option><option value="revoke">REVOKE</option></select>
+  <input type="text" name="name" class="form-control form-control-sm mr-2" placeholder="role" required>
+  <input type="text" name="privs" class="form-control form-control-sm mr-2" placeholder="SELECT, INSERT" required>
+  <input type="text" name="scope" class="form-control form-control-sm mr-2" placeholder="schema.table" required>
+  <button class="btn btn-sm btn-primary">Run</button>
+</form>
+<% } %>
+<% } %>
+<%- await include('v-FOOT.ejs'); %>

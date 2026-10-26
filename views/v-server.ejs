@@ -1,0 +1,17 @@
+<%- await include('v-HEAD.ejs'); %>
+<% function hb(n){ n=Number(n||0); if(n<1024) return n+' B'; if(n<1048576) return (n/1024).toFixed(1)+' KB'; if(n<1073741824) return (n/1048576).toFixed(1)+' MB'; return (n/1073741824).toFixed(2)+' GB'; } %>
+<h2>Databases</h2>
+<table class="adminer-table">
+  <thead><tr><th>Database</th><th>Size</th><th>Tables</th></tr></thead>
+  <tbody>
+  <% if (!VIEW.dbs.length) { %><tr><td colspan="3" class="dim">No databases</td></tr><% } %>
+  <% VIEW.dbs.forEach(d => { %>
+    <tr>
+      <td><a href="<%= VIEW.q('/db', { db: d.name }) %>"><%= d.name %></a></td>
+      <td class="num"><%= hb(d.bytes) %></td>
+      <td class="num"><%= d.tables %></td>
+    </tr>
+  <% }) %>
+  </tbody>
+</table>
+<%- await include('v-FOOT.ejs'); %>

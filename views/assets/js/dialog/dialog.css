@@ -1,0 +1,68 @@
+/* Cordoba dialog — native <dialog> (ported to AdminerBun) */
+/* Uses box-shadow for dimming instead of a wrapper div. Colors use :root vars. */
+
+dialog.cordoba-dialog {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 1.5rem;
+  min-width: 320px;
+  max-width: 480px;
+  box-shadow: 0 0 0 9999px var(--overlay-bg);
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-primary);
+  background: var(--bg-white);
+}
+dialog.cordoba-dialog::backdrop { background: transparent; }
+dialog.cordoba-dialog h4 {
+  margin: 0 0 0.75rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+dialog.cordoba-dialog p {
+  margin: 0 0 1rem;
+  color: var(--text-primary);
+}
+dialog.cordoba-dialog .dialog-check {
+  margin: 0 0 1rem;
+}
+dialog.cordoba-dialog .dialog-check label {
+  font-size: 13px;
+  cursor: pointer;
+  color: var(--text-primary);
+}
+dialog.cordoba-dialog .dialog-check input {
+  margin-right: 0.4rem;
+}
+dialog.cordoba-dialog .dialog-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-start;
+}
+dialog.cordoba-dialog .btn {
+  padding: 0.35rem 1rem;
+  border-radius: 3px;
+  border: 1px solid var(--border);
+  background: var(--bg-white);
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--text-primary);
+}
+dialog.cordoba-dialog .btn[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+dialog.cordoba-dialog .btn-primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--text-white);
+}
+dialog.cordoba-dialog .btn-primary:hover { filter: brightness(1.12); }
+dialog.cordoba-dialog .btn-danger {
+  background: var(--danger);
+  border-color: var(--danger);
+  color: var(--text-white);
+}
+dialog.cordoba-dialog .btn-danger:hover { filter: brightness(1.12); }
+dialog.cordoba-dialog .btn-cancel:hover { filter: brightness(1.08); }

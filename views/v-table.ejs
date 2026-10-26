@@ -1,0 +1,100 @@
+<%- await include('v-HEAD.ejs'); %>
+<% var isPg = VIEW.session.engine === 'pgsql'; var isSqlite = VIEW.session.engine === 'sqlite'; var isMar = VIEW.session.engine === 'maria'; %>
+<h2>Structure: <%= VIEW.table %></h2>
+
+<p class="mb-3">
+  <a href="<%= VIEW.q('/select', { db: VIEW.db, table: VIEW.table, schema: VIEW.schema }) %>">Select</a>
+  <span class="dim">·</span>
+  <a href="<%= VIEW.q('/insert', { db: VIEW.db, table: VIEW.table, schema: VIEW.schema }) %>">New item</a>
+  <span class="dim">·</span>
+  <a href="<%= VIEW.q('/alter-column', { db: VIEW.db, table: VIEW.table, schema: VIEW.schema }) %>">Add column</a>
+</p>
+
+<% if (isMar) { %>
+<form id="reorder-form" method="post" action="/reorder-columns">
+  <input type="hidden" name="csrf" value="<%= VIEW.session.csrf %>">
+  <input type="hidden" name="db" value="<%= VIEW.db %>">
+  <input type="hidden" name="table" value="<%= VIEW.table %>">
+  <input type="hidden" name="order" id="cols-order">
+</form>
+<% } %>
+
+<h3>Columns
+  <% if (isMar) { %><span class="dim"> — drag the ⠿ handle to reorder (saved automatically)</span><% } %>
+  <% if (!isMar) { %><span class="dim"> — column reordering is not supported by this database engine</span><% } %>
+</h3>
+
+<div class="table-responsive">
+<table class="adminer-table">
+  <thead><tr>
+    <% if (isMar) { %><th></th><% } %>
+    <th>Name</th><th>Type</th><th>Nullable</th><th>Default</th><th>Extra</th><th></th>
+  </tr></thead>
+  <tbody <%= isMar ? 'id="cols-sort"' : '' %>>
+  <% (VIEW.info.cols||[]).forEach(c => { %>
+    <tr <%= isMar ? `data-name="${c.name}"` : '' %>>
+      <% if (isMar) { %><td class="sort-handle dim" style="cursor:move">⠿</td><% } %>
+      <td><%= c.name %></td>
+      <td><%= c.type %></td>
+      <td><%= (typeof c.nullable === 'boolean' ? c.nullable : String(c.nullable).toLowerCase() !== 'no') ? 'yes' : 'no' %></td>
+      <td class="dim"><%= c.def === null || c.def === undefined ? '' : c.def %></td>
+      <td class="dim"><%= c.extra || c.identity || c.generated || (c.pk ? 'PK' : '') %></td>
+      <td>
+        <a href="<%= VIEW.q('/alter-column', { db: VIEW.db, table: VIEW.table, schema: VIEW.schema, column: c.name }) %>">edit</a>
+        <form method="post" action="/alter-column" class="d-inline">
+          <input type="hidden" name="csrf" value="<%= VIEW.session.csrf %>">
+          <% if (!isSqlite) { %><input type="hidden" name="db" value="<%= VIEW.db %>"><% } %>
+          <% if (isPg) { %><input type="hidden" name="schema" value="<%= VIEW.schema %>"><% } %>
+          <input type="hidden" name="table" value="<%= VIEW.table %>">
+          <input type="hidden" name="action" value="drop">
+          <input type="hidden" name="column" value="<%= c.name %>">
+          <button type="button" class="btn btn-link btn-sm p-0" data-confirm="Drop column <%= c.name %>?">drop</button>
+        </form>
+      </td>
+    </tr>
+  <% }) %>
+  </tbody>
+</table>
+</div>
+
+<h3>Indexes</h3>
+<div class="table-responsive">
+<table class="adminer-table">
+  <thead><tr><th>Name</th><th>Unique</th><th>Columns / definition</th></tr></thead>
+  <tbody>
+  <% if (!(VIEW.info.indexes||[]).length) { %><tr><td colspan="3" class="dim">none</td></tr><% } %>
+  <% (VIEW.info.indexes||[]).forEach(i => { %>
+    <tr>
+      <td><%= i.Key_name || i.name %></td>
+      <td><%= i.Non_unique === 0 || i.unique || i.primary ? 'yes' : '' %></td>
+      <td class="dim"><%= i.Column_name || i.def || '' %></td>
+    </tr>
+  <% }) %>
+  </tbody>
+</table>
+</div>
+
+<h3>Foreign keys</h3>
+<div class="table-responsive">
+<table class="adminer-table">
+  <thead><tr><th>Name</th><th>Column</th><th>References</th><th>On delete / update</th></tr></thead>
+  <tbody>
+  <% if (!(VIEW.info.fks||[]).length) { %><tr><td colspan="4" class="dim">none</td></tr><% } %>
+  <% (VIEW.info.fks||[]).forEach(f => { %>
+    <tr>
+      <td><%= f.name %></td>
+      <td><%= f.col %></td>
+      <td><%= f.refTable %>.<%= f.refCol %></td>
+      <td class="dim"><%= f.onDelete || f.on_delete %> / <%= f.onUpdate || f.on_update %></td>
+    </tr>
+  <% }) %>
+  </tbody>
+</table>
+</div>
+
+<% if (VIEW.info.createSql) { %>
+<h3>Create SQL</h3>
+<pre class="adminer-error" style="background:#fafafa;color:#000;border:1px solid #ccc;"><%= VIEW.info.createSql %></pre>
+<% } %>
+
+<%- await include('v-FOOT.ejs'); %>

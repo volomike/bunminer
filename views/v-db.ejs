@@ -1,0 +1,47 @@
+<%- await include('v-HEAD.ejs'); %>
+<% var isPg = VIEW.session.engine === 'pgsql'; var isSqlite = VIEW.session.engine === 'sqlite'; %>
+<% function hb(n){ n=Number(n||0); if(n<1024) return n+' B'; if(n<1048576) return (n/1024).toFixed(1)+' KB'; if(n<1073741824) return (n/1048576).toFixed(1)+' MB'; return (n/1073741824).toFixed(2)+' GB'; } %>
+<h2>Tables<% if (VIEW.db) { %> — <%= VIEW.db %><% } %>
+  <a class="btn btn-sm btn-outline-secondary" href="<%= VIEW.q('/create', { db: VIEW.db, schema: VIEW.schema }) %>">Create table</a>
+</h2>
+
+<% if (isPg && VIEW.schemas) { %>
+<form method="get" action="/db" class="form-inline mb-3">
+  <input type="hidden" name="db" value="<%= VIEW.db %>">
+  <label class="mr-2">Schema</label>
+  <select name="schema" id="schema-select" class="form-control form-control-sm">
+    <% VIEW.schemas.forEach(sc => { %><option value="<%= sc %>" <%= sc===VIEW.schema?'selected':'' %>><%= sc %></option><% }) %>
+  </select>
+</form>
+<% } %>
+
+<table class="adminer-table">
+  <thead><tr><th>Name</th><th>Type</th><th>Rows</th><th>Size</th><th></th></tr></thead>
+  <tbody>
+  <% if (!VIEW.tables.length) { %><tr><td colspan="5" class="dim">No tables</td></tr><% } %>
+  <% VIEW.tables.forEach(t => { %>
+    <tr>
+      <td>
+        <a href="<%= VIEW.q('/table', { db: VIEW.db, table: t.name, schema: VIEW.schema }) %>"><%= t.name %></a>
+      </td>
+      <td class="dim"><%= t.kindLabel || t.type || t.ENGINE %></td>
+      <td class="num"><%= t.rows %></td>
+      <td class="num"><%= hb(t.bytes) %></td>
+      <td>
+        <a href="<%= VIEW.q('/select', { db: VIEW.db, table: t.name, schema: VIEW.schema }) %>">select</a>
+        <% if (!isSqlite) { %>
+          <form method="post" action="/drop" class="d-inline">
+            <input type="hidden" name="csrf" value="<%= VIEW.session.csrf %>">
+            <input type="hidden" name="db" value="<%= VIEW.db %>">
+            <% if (isPg) { %><input type="hidden" name="schema" value="<%= VIEW.schema %>"><% } %>
+            <input type="hidden" name="table" value="<%= t.name %>">
+            <input type="hidden" name="kind" value="<%= t.kind || '' %>">
+            <button type="button" class="btn btn-link btn-sm p-0" data-confirm="Drop table <%= t.name %>?">drop</button>
+          </form>
+        <% } %>
+      </td>
+    </tr>
+  <% }) %>
+  </tbody>
+</table>
+<%- await include('v-FOOT.ejs'); %>

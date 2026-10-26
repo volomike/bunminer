@@ -1,0 +1,15 @@
+<%- await include('v-HEAD.ejs'); %>
+<h2>History</h2>
+<table class="adminer-table">
+  <thead><tr><th>When</th><th>SQL</th></tr></thead>
+  <tbody>
+  <% if (!VIEW.history.length) { %><tr><td colspan="2" class="dim">No queries yet</td></tr><% } %>
+  <% VIEW.history.forEach(h => { %>
+    <tr>
+      <td class="dim"><%= new Date(h.time).toLocaleString() %></td>
+      <td><a href="<%= VIEW.q('/sql', { db: VIEW.db, sql: h.sql }) %>"><code><%= h.sql.length > 80 ? h.sql.slice(0, 80) + '…' : h.sql %></code></a></td>
+    </tr>
+  <% }) %>
+  </tbody>
+</table>
+<%- await include('v-FOOT.ejs'); %>

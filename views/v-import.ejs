@@ -1,0 +1,16 @@
+<%- await include('v-HEAD.ejs'); %>
+<% var isPg = VIEW.session.engine === 'pgsql'; var isSqlite = VIEW.session.engine === 'sqlite'; %>
+<h2>Import</h2>
+
+<form method="post" action="/import" enctype="multipart/form-data">
+  <input type="hidden" name="csrf" value="<%= VIEW.session.csrf %>">
+  <% if (!isSqlite) { %><input type="hidden" name="db" value="<%= VIEW.db %>"><% } %>
+  <% if (isPg) { %><input type="hidden" name="schema" value="<%= VIEW.schema %>"><% } %>
+  <div class="form-group">
+    <label>File (.sql or .sql.gz)</label>
+    <input type="file" name="file" class="form-control-file">
+  </div>
+  <button type="submit" class="btn btn-sm btn-primary">Import</button>
+</form>
+<% if (VIEW.result) { %><div class="adminer-msg"><pre><%= VIEW.result %></pre></div><% } %>
+<%- await include('v-FOOT.ejs'); %>
