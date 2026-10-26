@@ -30,6 +30,22 @@ export default async function({ w, VIEW }) {
   VIEW.selKey = 'dbxadm2.sel.' + encodeURIComponent(db + '|' + table);
   VIEW.q = (path, o) => w.m.fmt.url(s, path, o);
 
+  // sort state for column headers (first column + direction of the ORDER BY value)
+  let sortCol = null;
+  let sortDir = null;
+  const ot = order.trim();
+  if (ot) {
+    const m = ot.split(',')[0].trim().match(/^(`[^`]*`|"[^"]*"|[^\s]+)(?:\s+(asc|desc))?/i);
+    if (m) {
+      sortCol = m[1].replace(/[`"]/g, '');
+      sortDir = String(m[2] || 'asc').toLowerCase();
+    }
+  }
+  VIEW.sortCol = sortCol;
+  VIEW.sortDir = sortDir;
+  VIEW.quoteIdent = (x) => s.engine === 'maria' ? '`' + String(x).replace(/`/g, '``') + '`' : '"' + String(x).replace(/"/g, '""') + '"';
+  VIEW.sortOrderFor = (c) => (/^[A-Za-z_][A-Za-z0-9_]*$/.test(c) ? c : VIEW.quoteIdent(c));
+
   try {
     const info = await adapter.columns(s, ns, table);
     const data = await adapter.rows(s, ns, table, { where, order, limit, offset });

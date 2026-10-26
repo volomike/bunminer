@@ -7,7 +7,7 @@
   <% if (isPg) { %><input type="hidden" name="schema" value="<%= VIEW.schema %>"><% } %>
   <input type="hidden" name="table" value="<%= VIEW.table %>">
   <input type="text" name="where" class="form-control form-control-sm mr-2" placeholder="WHERE" value="<%= VIEW.where %>">
-  <input type="text" name="order" class="form-control form-control-sm mr-2" placeholder="ORDER BY" value="<%= VIEW.order %>">
+  <input type="text" name="order" class="form-control form-control-sm mr-2" placeholder="ORDER BY (e.g. id ASC, name DESC)" value="<%= VIEW.order %>">
   <select name="limit" class="form-control form-control-sm mr-2">
     <% VIEW.limitOptions.forEach(n => { %><option value="<%= n %>" <%= VIEW.limit===n?'selected':'' %>><%= n %></option><% }) %>
   </select>
@@ -36,7 +36,16 @@
     <tr>
       <th><input type="checkbox" class="select-all-page"></th>
       <th></th>
-      <% VIEW.columns.forEach(c => { %><th><%= c %></th><% }) %>
+      <% VIEW.columns.forEach(c => { %>
+        <% const isSorted = VIEW.sortCol === c; %>
+        <% const nextDir = isSorted ? (VIEW.sortDir === 'asc' ? 'desc' : 'asc') : 'asc'; %>
+        <th>
+          <a class="col-sort" href="<%= VIEW.q('/select', { db: VIEW.db, table: VIEW.table, schema: VIEW.schema, where: VIEW.where, order: VIEW.sortOrderFor(c) + ' ' + nextDir, limit: VIEW.limit }) %>">
+            <span><%= c %></span>
+            <% if (isSorted) { %><span class="sort-caret"><%= VIEW.sortDir === 'asc' ? '▲' : '▼' %></span><% } %>
+          </a>
+        </th>
+      <% }) %>
     </tr>
   </thead>
   <tbody>
