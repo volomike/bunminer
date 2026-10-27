@@ -21,7 +21,9 @@
   <% if (isPg) { %><input type="hidden" name="schema" value="<%= VIEW.schema %>"><% } %>
   <input type="hidden" name="table" value="<%= VIEW.table %>">
   <input type="hidden" name="rows" id="bulk-rows">
-  <input type="hidden" id="sel-key" value="<%= VIEW.selKey %>">
+  <input type="hidden" name="all" id="bulk-all" value="0">
+  <input type="hidden" name="where" value="<%= VIEW.where %>">
+  <input type="hidden" id="sel-key" value="<%= VIEW.selKey %>" data-total="<%= VIEW.total %>">
   <label class="mr-2">With Selected Items:</label>
   <select name="action" id="bulk-action" class="custom-select custom-select-sm d-inline-block mr-2" style="width:auto">
     <option value="delete">Delete</option>

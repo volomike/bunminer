@@ -309,9 +309,30 @@ async function renameIndex() {
   throw new Error('SQLite cannot rename an index — drop it and create a new one instead.');
 }
 
+async function deleteWhere(session, _schema, table, where) {
+  const db = open(session);
+  try {
+    const wh = (where || '').trim();
+    db.run(`DELETE FROM ${ident(table)}${wh ? ' WHERE ' + wh : ''}`);
+    return {};
+  } finally { db.close(); }
+}
+
+async function pks(session, _schema, table, where) {
+  const db = open(session);
+  try {
+    const pkCols = db.query(`PRAGMA table_info(${ident(table)})`).all().filter(c => c.pk).sort((a, b) => a.pk - b.pk).map(c => c.name);
+    if (!pkCols.length) return { pkCols: [], pkRows: [] };
+    const wh = (where || '').trim();
+    const rows = db.query(`SELECT ${pkCols.map(ident).join(', ')} FROM ${ident(table)}${wh ? ' WHERE ' + wh : ''}`).all();
+    return { pkCols, pkRows: rows.map(r => pkCols.map(c => r[c])) };
+  } finally { db.close(); }
+}
+
 export default {
   ping, close, databases, tables, columns, rows, rowByPk, insert, update, remove,
   execute, explain, dump, importSql, blob, dropTable, truncate, exportRows,
   createTable, addColumn, dropColumn, editColumn,
   createIndex, dropIndex, renameIndex,
+  deleteWhere, pks,
 };

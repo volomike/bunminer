@@ -1,12 +1,16 @@
 (function ($) {
-  // Multi-page row selection (select page), stored per-table in localStorage
+  // Multi-page row selection, stored per-table in localStorage, plus a "select all" flag
   function getSelKey() { return $('#sel-key').val(); }
+  function allKey() { return getSelKey() + '.all'; }
+  function isAll() { try { return localStorage.getItem(allKey()) === '1'; } catch (e) { return false; } }
+  function setAll(v) { try { if (v) localStorage.setItem(allKey(), '1'); else localStorage.removeItem(allKey()); } catch (e) {} }
   function getSelection() { try { return JSON.parse(localStorage.getItem(getSelKey()) || '[]'); } catch (e) { return []; } }
   function setSelection(a) { try { localStorage.setItem(getSelKey(), JSON.stringify(a)); } catch (e) {} }
+  function getTotal() { var n = parseInt($('#sel-key').attr('data-total') || '0', 10); return isNaN(n) ? 0 : n; }
   function updateSelCount() {
     var $c = $('#sel-count');
     if (!$c.length) return;
-    var n = getSelection().length;
+    var n = isAll() ? getTotal() : getSelection().length;
     $c.text(n ? n + ' selected' : '');
   }
 
@@ -24,32 +28,17 @@
     }
 
     // Restore selection state for rows rendered on this page
-    var sel = getSelection();
-    $('.row-sel').each(function () {
-      if (sel.indexOf($(this).attr('data-key')) >= 0) this.checked = true;
-    });
-    updateSelCount();
-  });
-
-  // Pagination preference — per-browser via localStorage (not shared between users on the same login)
-  $(function () {
-    var $limit = $('select[name="limit"]');
-    if (!$limit.length) return;
-    var key = 'dbxadm2.pagination';
-    var saved = localStorage.getItem(key);
-    if (saved && !new URLSearchParams(window.location.search).has('limit')) {
-      var n = parseInt(saved, 10);
-      if (!isNaN(n)) {
-        var u = new URL(window.location.href);
-        u.searchParams.set('limit', n);
-        window.location.href = u.toString();
-        return;
-      }
+    if (isAll()) {
+      $('.select-all-page').prop('checked', true);
+      $('.row-sel').each(function () { this.checked = true; this.disabled = true; });
+      $('#bulk-all').val('1');
+    } else {
+      var sel = getSelection();
+      $('.row-sel').each(function () {
+        if (sel.indexOf($(this).attr('data-key')) >= 0) this.checked = true;
+      });
     }
-    $limit.on('change', function () {
-      localStorage.setItem(key, this.value);
-      this.form.submit();
-    });
+    updateSelCount();
   });
 
   // AYS danger dialog for destructive actions
@@ -71,6 +60,7 @@
 
   // Row checkbox selection (persists across pages)
   $(document).on('change', '.row-sel', function () {
+    if (isAll()) return;
     var key = $(this).attr('data-key');
     var sel = getSelection();
     var i = sel.indexOf(key);
@@ -80,21 +70,37 @@
     updateSelCount();
   });
 
-  // Select all rows on this page
+  // Select all / deselect all rows across every page of the dataset
   $(document).on('change', '.select-all-page', function () {
     var checked = this.checked;
-    $('.row-sel').each(function () { $(this).prop('checked', checked).trigger('change'); });
+    setAll(checked);
+    setSelection([]);
+    if (checked) {
+      $('.row-sel').each(function () { this.checked = true; this.disabled = true; });
+      $('#bulk-all').val('1');
+    } else {
+      $('.row-sel').each(function () { this.checked = false; this.disabled = false; });
+      $('#bulk-all').val('0');
+    }
+    updateSelCount();
   });
 
   // Bulk actions ("With Selected Items")
   $(document).on('submit', '#bulk-form', function (e) {
     e.preventDefault();
     var form = this;
-    var sel = getSelection();
-    if (!sel.length) { Cordoba.alert('No rows selected.', 'Notice'); return; }
-    $('#bulk-rows').val(JSON.stringify(sel));
+    var all = isAll();
+    var sel = all ? [] : getSelection();
+    if (all) {
+      $('#bulk-all').val('1');
+      $('#bulk-rows').val('[]');
+    } else {
+      $('#bulk-all').val('0');
+      $('#bulk-rows').val(JSON.stringify(sel));
+      if (!sel.length) { Cordoba.alert('No rows selected.', 'Notice'); return; }
+    }
     var action = $('#bulk-action').val();
-    var label = sel.length + ' row' + (sel.length === 1 ? '' : 's');
+    var label = all ? (getTotal() + ' rows') : (sel.length + ' row' + (sel.length === 1 ? '' : 's'));
     if (action === 'delete') {
       Cordoba.danger('Delete ' + label + '?', 'Are you sure?').then(function (ok) { if (ok) form.submit(); });
     } else {
@@ -102,11 +108,24 @@
     }
   });
 
-  // Variables/status filter
-  $(document).on('keyup', '#filter', function () {
-    var q = String(this.value).toLowerCase();
-    $('#vars tbody tr').each(function () {
-      $(this).toggle($(this).text().toLowerCase().indexOf(q) > -1);
+  // Pagination preference — per-browser via localStorage (not shared between users on the same login)
+  $(function () {
+    var $limit = $('select[name="limit"]');
+    if (!$limit.length) return;
+    var key = 'dbxadm2.pagination';
+    var saved = localStorage.getItem(key);
+    if (saved && !new URLSearchParams(window.location.search).has('limit')) {
+      var n = parseInt(saved, 10);
+      if (!isNaN(n)) {
+        var u = new URL(window.location.href);
+        u.searchParams.set('limit', n);
+        window.location.href = u.toString();
+        return;
+      }
+    }
+    $limit.on('change', function () {
+      localStorage.setItem(key, this.value);
+      this.form.submit();
     });
   });
 
@@ -138,5 +157,13 @@
   // PostgreSQL schema selector auto-submit (CSP-safe — no inline handlers)
   $(document).on('change', '#schema-select', function () {
     this.form.submit();
+  });
+
+  // Variables/status filter
+  $(document).on('keyup', '#filter', function () {
+    var q = String(this.value).toLowerCase();
+    $('#vars tbody tr').each(function () {
+      $(this).toggle($(this).text().toLowerCase().indexOf(q) > -1);
+    });
   });
 })(jQuery);

@@ -8,6 +8,24 @@ export default async function({ w }) {
   const schema = s.engine === 'pgsql' ? (w.post['schema'] || s.schema || 'public') : db;
   const ns = s.engine === 'pgsql' ? schema : db;
   const action = w.post['action'] || 'delete';
+  const all = w.post['all'] === '1';
+  const where = (w.post['where'] || '').trim();
+
+  if (all) {
+    if (action === 'export') {
+      const { pkCols, pkRows } = await adapter.pks(s, ns, table, where);
+      const bytes = await adapter.exportRows(s, ns, table, pkCols, pkRows);
+      const out = Bun.gzipSync(bytes);
+      return new Response(out, {
+        headers: {
+          'Content-Type': 'application/octet-stream',
+          'Content-Disposition': `attachment; filename="${table}.selected.sql.gz"`,
+        },
+      });
+    }
+    await adapter.deleteWhere(s, ns, table, where);
+    return w.doRedirect(w.m.fmt.url(s, '/select', { db, table, schema }));
+  }
 
   let keys = [];
   try { keys = JSON.parse(w.post['rows'] || '[]'); } catch {}

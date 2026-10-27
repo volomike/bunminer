@@ -7,6 +7,26 @@ export default async function({ w }) {
   if (!res) return w.doRedirect('/sql');
   const ns = s.engine === 'pgsql' ? res.schema : res.db;
   const action = w.post['action'] || 'delete';
+  const all = w.post['all'] === '1';
+
+  if (all) {
+    if (action === 'export') {
+      const pkRows = res.rows.map(r => res.pkCols.map(c => r[c]));
+      const bytes = await adapter.exportRows(s, ns, res.table, res.pkCols, pkRows);
+      const out = Bun.gzipSync(bytes);
+      return new Response(out, {
+        headers: {
+          'Content-Type': 'application/octet-stream',
+          'Content-Disposition': `attachment; filename="${res.table}.selected.sql.gz"`,
+        },
+      });
+    }
+    for (const r of res.rows) {
+      await adapter.remove(s, ns, res.table, res.pkCols, res.pkCols.map(c => r[c]));
+    }
+    s.sqlResult = null;
+    return w.doRedirect('/sql');
+  }
 
   let keys = [];
   try { keys = JSON.parse(w.post['rows'] || '[]'); } catch {}
