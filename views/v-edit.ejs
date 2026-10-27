@@ -29,7 +29,8 @@
     </tbody>
   </table>
 
+  <input type="hidden" name="back" value="<%= VIEW.returnUrl %>">
   <button type="submit" class="btn btn-sm btn-primary">Save</button>
-  <a class="btn btn-sm btn-outline-secondary" href="<%= VIEW.q('/select', { db: VIEW.db, table: VIEW.table, schema: VIEW.schema }) %>">Cancel</a>
+  <a class="btn btn-sm btn-outline-secondary" href="<%= VIEW.returnUrl %>">Cancel</a>
 </form>
 <%- await include('v-FOOT.ejs'); %>

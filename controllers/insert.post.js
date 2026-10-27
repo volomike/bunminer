@@ -18,5 +18,6 @@ export default async function({ w }) {
   const ns = s.engine === 'pgsql' ? schema : db;
   const values = fieldValues(w.post);
   await adapter.insert(s, ns, table, values);
-  return w.doRedirect(w.m.fmt.url(s, '/select', { db, table, schema }));
+  const back = w.post['back'] || '';
+  return w.doRedirect((back.startsWith('/') && !back.startsWith('//')) ? back : w.m.fmt.url(s, '/select', { db, table, schema }));
 }

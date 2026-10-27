@@ -12,7 +12,7 @@
     <% VIEW.limitOptions.forEach(n => { %><option value="<%= n %>" <%= VIEW.limit===n?'selected':'' %>><%= n %></option><% }) %>
   </select>
   <button class="btn btn-sm btn-outline-secondary">Apply</button>
-  <a class="btn btn-sm btn-outline-secondary" href="<%= VIEW.q('/insert', { db: VIEW.db, table: VIEW.table, schema: VIEW.schema }) %>">New item</a>
+  <a class="btn btn-sm btn-outline-secondary" href="<%= VIEW.q('/insert', { db: VIEW.db, table: VIEW.table, schema: VIEW.schema, back: VIEW.back }) %>">New item</a>
 </form>
 
 <form id="bulk-form" method="post" action="/select-action" class="mb-2">
@@ -24,6 +24,7 @@
   <input type="hidden" name="all" id="bulk-all" value="0">
   <input type="hidden" name="where" value="<%= VIEW.where %>">
   <input type="hidden" id="sel-key" value="<%= VIEW.selKey %>" data-total="<%= VIEW.total %>">
+  <input type="hidden" id="draft-key" value="<%= VIEW.draftKey %>">
   <label class="mr-2">With Selected Items:</label>
   <select name="action" id="bulk-action" class="custom-select custom-select-sm d-inline-block mr-2" style="width:auto">
     <option value="delete">Delete</option>
