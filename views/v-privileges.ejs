@@ -62,7 +62,7 @@
 <h3>Grant / revoke</h3>
 <form method="post" action="/privileges" class="form-inline mb-3">
   <input type="hidden" name="csrf" value="<%= VIEW.session.csrf %>">
-  <select name="action" class="form-control form-control-sm mr-2"><option value="grant">GRANT</option><option value="revoke">REVOKE</option></select>
+  <select name="action" class="custom-select custom-select-sm mr-2"><option value="grant">GRANT</option><option value="revoke">REVOKE</option></select>
   <input type="text" name="user" class="form-control form-control-sm mr-2" placeholder="user" required>
   <input type="text" name="host" class="form-control form-control-sm mr-2" placeholder="host" required>
   <input type="text" name="privs" class="form-control form-control-sm mr-2" placeholder="ALL PRIVILEGES / SELECT, INSERT" required>
@@ -93,7 +93,7 @@
 <h3>Grant / revoke</h3>
 <form method="post" action="/privileges" class="form-inline mb-3">
   <input type="hidden" name="csrf" value="<%= VIEW.session.csrf %>">
-  <select name="action" class="form-control form-control-sm mr-2"><option value="grant">GRANT</option><option value="revoke">REVOKE</option></select>
+  <select name="action" class="custom-select custom-select-sm mr-2"><option value="grant">GRANT</option><option value="revoke">REVOKE</option></select>
   <input type="text" name="name" class="form-control form-control-sm mr-2" placeholder="role" required>
   <input type="text" name="privs" class="form-control form-control-sm mr-2" placeholder="SELECT, INSERT" required>
   <input type="text" name="scope" class="form-control form-control-sm mr-2" placeholder="schema.table" required>
