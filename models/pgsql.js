@@ -441,10 +441,28 @@ async function renameIndex(session, schema, table, oldName, newName) {
   await pool.query(`ALTER INDEX ${ident(schema)}.${ident(oldName)} RENAME TO ${ident(newName)}`);
 }
 
+async function deleteWhere(session, schema, table, where) {
+  const pool = poolFor(session);
+  const t = `${ident(schema)}.${ident(table)}`;
+  const wh = (where || '').trim();
+  await pool.query(`DELETE FROM ${t}${wh ? ' WHERE ' + wh : ''}`);
+}
+
+async function pks(session, schema, table, where) {
+  const pool = poolFor(session);
+  const cols = await primaryKey(session, schema, table);
+  if (!cols.length) return { pkCols: [], pkRows: [] };
+  const t = `${ident(schema)}.${ident(table)}`;
+  const wh = (where || '').trim();
+  const r = await pool.query(`SELECT ${cols.map(ident).join(', ')} FROM ${t}${wh ? ' WHERE ' + wh : ''}`);
+  return { pkCols: cols, pkRows: r.rows.map(row => cols.map(c => row[c])) };
+}
+
 export default {
   ping, close, databases, schemas, tables, primaryKey, columns, rows, rowByPk, insert, update, remove,
   execute, explain, processlist, kill, variables, status, users, grants,
   createRole, dropRole, alterRole, grant, revoke, dump, importSql, blob, dropTable, truncate, exportRows,
   createTable, addColumn, dropColumn, editColumn,
   createIndex, dropIndex, renameIndex,
+  deleteWhere, pks,
 };
