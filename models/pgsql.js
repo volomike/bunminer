@@ -351,7 +351,7 @@ async function blob(session, schema, table, col, pkCols, pkVals) {
 
 async function dropTable(session, schema, table, kind) {
   const pool = poolFor(session);
-  const k = kind === 'view' ? 'VIEW' : kind === 'materialized view' ? 'MATERIALIZED VIEW' : 'TABLE';
+  const k = kind === 'v' ? 'VIEW' : kind === 'm' ? 'MATERIALIZED VIEW' : kind === 'S' ? 'SEQUENCE' : 'TABLE';
   await pool.query(`DROP ${k} ${ident(schema)}.${ident(table)}`);
 }
 
@@ -496,6 +496,64 @@ async function tableDdl(session, schema, table) {
   }
 }
 
+function seqNum(v) {
+  if (v === undefined || v === null || v === '') return null;
+  if (!/^-?\d+$/.test(String(v))) throw new Error('Invalid number: ' + v);
+  return String(v);
+}
+
+async function sequenceInfo(session, schema, name) {
+  const pool = poolFor(session);
+  const r = await pool.query(
+    `SELECT s.seqstart AS start_value, s.seqincrement AS increment_by,
+            s.seqmax AS max_value, s.seqmin AS min_value, s.seqcache AS cache_size, s.seqcycle AS cycle,
+            t.typname AS data_type, pg_catalog.pg_get_userbyid(c.relowner) AS owner
+     FROM pg_catalog.pg_class c
+     JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
+     JOIN pg_catalog.pg_sequence s ON s.seqrelid = c.oid
+     JOIN pg_catalog.pg_type t ON t.oid = c.reltype
+     WHERE n.nspname = $1 AND c.relname = $2`, [schema, name]
+  );
+  if (!r.rows[0]) return null;
+  let currentValue = null, isCalled = false;
+  try {
+    const c = await pool.query(`SELECT last_value, is_called FROM ${ident(schema)}.${ident(name)}`);
+    if (c.rows[0]) { currentValue = c.rows[0].last_value; isCalled = c.rows[0].is_called; }
+  } catch (e) { /* ignore */ }
+  return { ...r.rows[0], currentValue, isCalled };
+}
+
+async function alterSequence(session, schema, name, opts) {
+  const pool = poolFor(session);
+  const t = `${ident(schema)}.${ident(name)}`;
+  const clauses = [];
+  const inc = seqNum(opts.increment); if (inc) clauses.push(`INCREMENT BY ${inc}`);
+  const mn = seqNum(opts.min); if (mn) clauses.push(`MINVALUE ${mn}`);
+  const mx = seqNum(opts.max); if (mx) clauses.push(`MAXVALUE ${mx}`);
+  const ca = seqNum(opts.cache); if (ca) clauses.push(`CACHE ${ca}`);
+  if (opts.cycle !== undefined && opts.cycle !== null) clauses.push(opts.cycle ? 'CYCLE' : 'NO CYCLE');
+  if (!clauses.length) return;
+  await pool.query(`ALTER SEQUENCE ${t} ${clauses.join(' ')}`);
+}
+
+async function nextSequence(session, schema, name) {
+  const pool = poolFor(session);
+  const r = await pool.query(`SELECT nextval(${lit(`${schema}.${name}`)}) AS v`);
+  return r.rows[0].v;
+}
+
+async function setSequence(session, schema, name, value) {
+  const pool = poolFor(session);
+  const v = seqNum(value); if (v === null) throw new Error('Value required');
+  const r = await pool.query(`SELECT setval(${lit(`${schema}.${name}`)}, ${v}) AS v`);
+  return r.rows[0].v;
+}
+
+async function restartSequence(session, schema, name) {
+  const pool = poolFor(session);
+  await pool.query(`ALTER SEQUENCE ${ident(schema)}.${ident(name)} RESTART`);
+}
+
 export default {
   ping, close, databases, schemas, tables, primaryKey, columns, rows, rowByPk, insert, update, remove,
   execute, explain, processlist, kill, variables, status, users, grants,
@@ -503,4 +561,5 @@ export default {
   createTable, addColumn, dropColumn, editColumn,
   createIndex, dropIndex, renameIndex,
   deleteWhere, pks, tableDdl,
+  sequenceInfo, alterSequence, nextSequence, setSequence, restartSequence,
 };
