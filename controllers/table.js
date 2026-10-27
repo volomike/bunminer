@@ -20,6 +20,9 @@ export default async function({ w, VIEW }) {
 
   try {
     VIEW.info = await adapter.columns(s, ns, table);
+    if (s.engine === 'pgsql' && adapter.tableDdl) {
+      VIEW.info.createSql = await adapter.tableDdl(s, ns, table);
+    }
     VIEW.error = '';
   } catch (e) {
     VIEW.info = { cols: [], indexes: [], fks: [], createSql: '', pk: [] };

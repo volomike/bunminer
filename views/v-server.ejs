@@ -9,7 +9,7 @@
     <tr>
       <td><a href="<%= VIEW.q('/db', { db: d.name }) %>"><%= d.name %></a></td>
       <td class="num"><%= hb(d.bytes) %></td>
-      <td class="num"><%= d.tables %></td>
+      <td class="num"><%= d.tables == null ? '' : d.tables %></td>
     </tr>
   <% }) %>
   </tbody>

@@ -55,7 +55,25 @@ async function databases(session) {
             pg_catalog.pg_database_size(d.datname) AS bytes
      FROM pg_catalog.pg_database d ORDER BY d.datname`
   );
-  return r.rows.map(x => ({ ...x, bytes: Number(x.bytes || 0) }));
+  const list = r.rows.map(x => ({ ...x, bytes: Number(x.bytes || 0) }));
+  // PostgreSQL isolates its catalog per database, so count tables by connecting to each.
+  for (const d of list) {
+    try {
+      const client = new pg.Client(Object.assign({}, baseCfg(session), { database: d.name }));
+      await client.connect();
+      try {
+        const c = await client.query(
+          `SELECT COUNT(*) AS n FROM pg_catalog.pg_class c
+           JOIN pg_catalog.pg_namespace ns ON ns.oid = c.relnamespace
+           WHERE c.relkind IN ('r','p','v','m','f') AND ns.nspname NOT IN ('pg_catalog','information_schema')`
+        );
+        d.tables = Number(c.rows[0].n);
+      } finally { await client.end().catch(() => {}); }
+    } catch (e) {
+      d.tables = null; // offline or no permission — leave the cell blank
+    }
+  }
+  return list;
 }
 
 async function schemas(session) {
@@ -123,12 +141,11 @@ async function columns(session, schema, table) {
      JOIN pg_catalog.pg_namespace n ON n.oid = t.relnamespace
      WHERE n.nspname = $1 AND t.relname = $2 AND con.contype = 'f'`, [schema, table]
   );
-  const qddl = await pool.query(`SELECT pg_catalog.pg_get_tabledef(${lit(schema)} || '.' || ${lit(table)}) AS ddl`);
   return {
     cols: qcols.rows,
     indexes: qidx.rows,
     fks: qfk.rows,
-    createSql: (qddl.rows[0] && qddl.rows[0].ddl) || '',
+    createSql: '',
     pk: await primaryKey(session, schema, table),
   };
 }
@@ -461,11 +478,29 @@ async function pks(session, schema, table, where) {
   return { pkCols: cols, pkRows: r.rows.map(row => cols.map(c => row[c])) };
 }
 
+async function tableDdl(session, schema, table) {
+  try {
+    const srv = serverCfg(session);
+    const args = ['pg_dump', '-h', String(srv.host), '-p', String(srv.port), '-U', srv.user,
+      '--schema-only', '--no-owner', '--no-privileges', '-t', `${schema}.${table}`];
+    if (session.db) args.push(session.db);
+    const env = { PATH: process.env.PATH || '' };
+    env['PGPASSWORD'] = session.dbpass || '';
+    const proc = Bun.spawn({ cmd: args, env, stdout: 'pipe', stderr: 'pipe' });
+    const out = await new Response(proc.stdout).text();
+    const code = await proc.exited;
+    if (code !== 0) return '';
+    return out;
+  } catch (e) {
+    return '';
+  }
+}
+
 export default {
   ping, close, databases, schemas, tables, primaryKey, columns, rows, rowByPk, insert, update, remove,
   execute, explain, processlist, kill, variables, status, users, grants,
   createRole, dropRole, alterRole, grant, revoke, dump, importSql, blob, dropTable, truncate, exportRows,
   createTable, addColumn, dropColumn, editColumn,
   createIndex, dropIndex, renameIndex,
-  deleteWhere, pks,
+  deleteWhere, pks, tableDdl,
 };
