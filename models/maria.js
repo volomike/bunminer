@@ -394,9 +394,30 @@ async function reorderColumns(session, db, table, order) {
   await pool.query(`ALTER TABLE ${ident(db)}.${ident(table)} ${clauses.join(', ')}`);
 }
 
+async function createIndex(session, db, table, name, columns, unique) {
+  const pool = poolFor(session);
+  if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(name)) throw new Error('Invalid index name');
+  if (!columns.length) throw new Error('Specify at least one column');
+  const cols = columns.map(c => ident(c)).join(', ');
+  await pool.query(`CREATE ${unique ? 'UNIQUE ' : ''}INDEX ${ident(name)} ON ${ident(db)}.${ident(table)} (${cols})`);
+}
+
+async function dropIndex(session, db, table, name) {
+  const pool = poolFor(session);
+  if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(name)) throw new Error('Invalid index name');
+  await pool.query(`DROP INDEX ${ident(name)} ON ${ident(db)}.${ident(table)}`);
+}
+
+async function renameIndex(session, db, table, oldName, newName) {
+  const pool = poolFor(session);
+  if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(oldName) || !/^[A-Za-z_][A-Za-z0-9_]*$/.test(newName)) throw new Error('Invalid index name');
+  await pool.query(`ALTER TABLE ${ident(db)}.${ident(table)} RENAME INDEX ${ident(oldName)} TO ${ident(newName)}`);
+}
+
 export default {
   ping, close, databases, tables, primaryKey, columns, rows, rowByPk, insert, update, remove,
   execute, explain, processlist, kill, variables, status, users, grants,
   createUser, dropUser, setPassword, grant, revoke, dump, importSql, blob, dropTable, truncate, exportRows,
   createTable, addColumn, dropColumn, editColumn, reorderColumns,
+  createIndex, dropIndex, renameIndex,
 };

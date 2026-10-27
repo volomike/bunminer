@@ -26,24 +26,38 @@
     <% if (!sqliteEdit) { %>
     <div class="form-inline mb-3">
       <label class="mr-2">Type</label>
-      <input type="text" name="type" class="form-control form-control-sm mr-3" value="<%= VIEW.col.type %>" list="types" style="width:180px">
+      <select name="type" class="custom-select custom-select-sm mr-3" style="width:220px">
+        <% VIEW.types.forEach(t => { %>
+          <option value="<%= t %>" <%= t.toLowerCase() === VIEW.col.type.toLowerCase() ? 'selected' : '' %>><%= t %></option>
+        <% }) %>
+        <% if (VIEW.col.type && !VIEW.types.some(t => t.toLowerCase() === VIEW.col.type.toLowerCase())) { %>
+          <option value="<%= VIEW.col.type %>" selected><%= VIEW.col.type %></option>
+        <% } %>
+      </select>
       <label class="mr-2">Length</label>
       <input type="text" name="length" class="form-control form-control-sm mr-3" value="<%= VIEW.col.length %>" style="width:80px">
+    </div>
+    <div class="mb-3">
       <% if (isMar) { %>
-        <label class="mr-2"><input type="checkbox" name="unsigned" value="1" <%= VIEW.col.unsigned ? 'checked' : '' %>> unsigned</label>
-        <label class="mr-2"><input type="checkbox" name="ai" value="1" <%= VIEW.col.autoInc ? 'checked' : '' %>> auto-increment</label>
+        <div class="custom-control custom-checkbox custom-control-inline">
+          <input type="checkbox" class="custom-control-input" id="unsigned" name="unsigned" value="1" <%= VIEW.col.unsigned ? 'checked' : '' %>>
+          <label class="custom-control-label" for="unsigned">unsigned</label>
+        </div>
+        <div class="custom-control custom-checkbox custom-control-inline">
+          <input type="checkbox" class="custom-control-input" id="ai" name="ai" value="1" <%= VIEW.col.autoInc ? 'checked' : '' %>>
+          <label class="custom-control-label" for="ai">auto-increment</label>
+        </div>
       <% } %>
-      <label class="mr-2"><input type="checkbox" name="null" value="1" <%= VIEW.col.nullable ? 'checked' : '' %>> nullable</label>
+      <div class="custom-control custom-checkbox custom-control-inline">
+        <input type="checkbox" class="custom-control-input" id="nullable" name="null" value="1" <%= VIEW.col.nullable ? 'checked' : '' %>>
+        <label class="custom-control-label" for="nullable">nullable</label>
+      </div>
     </div>
     <div class="form-inline mb-3">
       <label class="mr-2">Default</label>
       <input type="text" name="def" class="form-control form-control-sm" value="<%= VIEW.col.def %>" style="width:200px">
     </div>
     <% } %>
-
-    <datalist id="types">
-      <% VIEW.types.forEach(t => { %><option value="<%= t %>"></option><% }) %>
-    </datalist>
 
     <button type="submit" class="btn btn-sm btn-primary">Save</button>
     <a class="btn btn-sm btn-outline-secondary" href="<%= VIEW.q('/table', { db: VIEW.db, table: VIEW.table, schema: VIEW.schema }) %>">Cancel</a>

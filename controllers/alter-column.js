@@ -1,7 +1,7 @@
 const TYPES = {
-  maria: ['INT', 'BIGINT', 'TINYINT', 'SMALLINT', 'VARCHAR', 'CHAR', 'TEXT', 'LONGTEXT', 'DATETIME', 'DATE', 'TIME', 'TIMESTAMP', 'DECIMAL', 'FLOAT', 'DOUBLE', 'BOOLEAN', 'JSON', 'ENUM', 'SET', 'BLOB'],
-  pgsql: ['INTEGER', 'BIGINT', 'SMALLINT', 'SERIAL', 'BIGSERIAL', 'VARCHAR', 'TEXT', 'TIMESTAMPTZ', 'TIMESTAMP', 'DATE', 'TIME', 'NUMERIC', 'REAL', 'DOUBLE PRECISION', 'BOOLEAN', 'JSONB', 'JSON', 'UUID', 'BYTEA'],
-  sqlite: ['INTEGER', 'TEXT', 'REAL', 'BLOB', 'NUMERIC', 'DATETIME', 'BOOLEAN', 'VARCHAR'],
+  maria: ['INT', 'TINYINT', 'SMALLINT', 'MEDIUMINT', 'INTEGER', 'BIGINT', 'DECIMAL', 'NUMERIC', 'FLOAT', 'DOUBLE', 'DOUBLE PRECISION', 'REAL', 'BIT', 'BOOLEAN', 'BOOL', 'DATE', 'TIME', 'DATETIME', 'TIMESTAMP', 'YEAR', 'CHAR', 'VARCHAR', 'BINARY', 'VARBINARY', 'TINYBLOB', 'BLOB', 'MEDIUMBLOB', 'LONGBLOB', 'TINYTEXT', 'TEXT', 'MEDIUMTEXT', 'LONGTEXT', 'JSON', 'UUID', 'INET4', 'INET6', 'POINT', 'LINESTRING', 'POLYGON', 'GEOMETRY'],
+  pgsql: ['integer', 'bigint', 'smallint', 'serial', 'bigserial', 'smallserial', 'numeric', 'decimal', 'real', 'double precision', 'money', 'character varying', 'varchar', 'character', 'char', 'text', 'bytea', 'date', 'time', 'time with time zone', 'timestamp', 'timestamp with time zone', 'interval', 'boolean', 'json', 'jsonb', 'uuid', 'xml', 'inet', 'cidr', 'macaddr', 'macaddr8', 'bit', 'bit varying', 'tsvector', 'tsquery', 'integer[]', 'bigint[]', 'text[]', 'character varying[]', 'numeric[]', 'boolean[]', 'uuid[]', 'jsonb[]'],
+  sqlite: ['INTEGER', 'BIGINT', 'TEXT', 'REAL', 'BLOB', 'NUMERIC', 'BOOLEAN', 'DATETIME', 'DATE', 'TIME', 'VARCHAR', 'CHAR', 'FLOAT', 'DOUBLE', 'DECIMAL', 'JSON'],
 };
 
 function parseType(t) {

@@ -1,0 +1,31 @@
+<%- await include('v-HEAD.ejs'); %>
+<h2><%= VIEW.isRename ? 'Rename index' : 'Add index' %>: <%= VIEW.table %></h2>
+<form method="post" action="/indexes">
+  <input type="hidden" name="csrf" value="<%= VIEW.session.csrf %>">
+  <% if (VIEW.session.engine !== 'sqlite') { %><input type="hidden" name="db" value="<%= VIEW.db %>"><% } %>
+  <% if (VIEW.session.engine === 'pgsql') { %><input type="hidden" name="schema" value="<%= VIEW.schema %>"><% } %>
+  <input type="hidden" name="table" value="<%= VIEW.table %>">
+  <input type="hidden" name="action" value="<%= VIEW.isRename ? 'rename' : 'add' %>">
+  <% if (VIEW.isRename) { %><input type="hidden" name="old" value="<%= VIEW.renameName %>"><% } %>
+
+  <div class="form-inline mb-3">
+    <label class="mr-2">Name</label>
+    <input type="text" name="name" class="form-control form-control-sm mr-3" value="<%= VIEW.isRename ? VIEW.renameName : '' %>" required style="width:220px">
+  </div>
+
+  <% if (!VIEW.isRename) { %>
+  <div class="form-inline mb-3">
+    <label class="mr-2">Columns (comma-separated)</label>
+    <input type="text" name="columns" class="form-control form-control-sm" style="width:360px" placeholder="col1, col2" required>
+  </div>
+  <div class="custom-control custom-checkbox mb-3">
+    <input type="checkbox" name="unique" value="1" class="custom-control-input" id="unique">
+    <label class="custom-control-label" for="unique">Unique index</label>
+  </div>
+  <div class="dim mb-2">Available columns: <%= VIEW.columns.join(', ') %></div>
+  <% } %>
+
+  <button type="submit" class="btn btn-sm btn-primary">Save</button>
+  <a class="btn btn-sm btn-outline-secondary" href="<%= VIEW.q('/table', { db: VIEW.db, table: VIEW.table, schema: VIEW.schema }) %>">Cancel</a>
+</form>
+<%- await include('v-FOOT.ejs'); %>

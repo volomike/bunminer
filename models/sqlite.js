@@ -284,8 +284,33 @@ async function editColumn(session, _schema, table, oldName, c) {
   } finally { db.close(); }
 }
 
+async function createIndex(session, _schema, table, name, columns, unique) {
+  const db = open(session);
+  try {
+    if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(name)) throw new Error('Invalid index name');
+    if (!columns.length) throw new Error('Specify at least one column');
+    const cols = columns.map(c => ident(c)).join(', ');
+    db.run(`CREATE ${unique ? 'UNIQUE ' : ''}INDEX ${ident(name)} ON ${ident(table)} (${cols})`);
+    return {};
+  } finally { db.close(); }
+}
+
+async function dropIndex(session, _schema, table, name) {
+  const db = open(session);
+  try {
+    if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(name)) throw new Error('Invalid index name');
+    db.run(`DROP INDEX ${ident(name)}`);
+    return {};
+  } finally { db.close(); }
+}
+
+async function renameIndex() {
+  throw new Error('SQLite cannot rename an index — drop it and create a new one instead.');
+}
+
 export default {
   ping, close, databases, tables, columns, rows, rowByPk, insert, update, remove,
   execute, explain, dump, importSql, blob, dropTable, truncate, exportRows,
   createTable, addColumn, dropColumn, editColumn,
+  createIndex, dropIndex, renameIndex,
 };
