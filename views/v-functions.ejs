@@ -1,0 +1,53 @@
+<%- await include('v-HEAD.ejs'); %>
+<h2>Functions</h2>
+
+<h3>Create function</h3>
+<form method="post" action="/functions" class="mb-4">
+  <input type="hidden" name="csrf" value="<%= VIEW.session.csrf %>">
+  <input type="hidden" name="db" value="<%= VIEW.db %>">
+  <input type="hidden" name="schema" value="<%= VIEW.schema %>">
+  <input type="hidden" name="action" value="create">
+  <div class="form-inline mb-2">
+    <label class="mr-2">Name</label><input type="text" name="name" class="form-control form-control-sm mr-3" required style="width:180px">
+    <label class="mr-2">Arguments</label><input type="text" name="args" class="form-control form-control-sm mr-3" placeholder="arg1 integer, arg2 text" style="width:280px">
+    <label class="mr-2">Returns</label><input type="text" name="ret" class="form-control form-control-sm mr-3" required style="width:150px">
+    <label class="mr-2">Language</label>
+    <select name="lang" class="custom-select custom-select-sm" style="width:120px">
+      <% ['sql','plpgsql','internal','c'].forEach(l => { %><option value="<%= l %>"><%= l %></option><% }) %>
+    </select>
+  </div>
+  <div class="mb-2">
+    <textarea name="body" class="form-control" rows="6" style="font-family:monospace" placeholder="function body"></textarea>
+  </div>
+  <button type="submit" class="btn btn-sm btn-primary">Create</button>
+</form>
+
+<h3>Existing</h3>
+<div class="table-responsive">
+<table class="adminer-table">
+  <thead><tr><th>Name</th><th>Arguments</th><th>Returns</th><th>Language</th><th></th></tr></thead>
+  <tbody>
+  <% if (!VIEW.functions.length) { %><tr><td colspan="5" class="dim">none</td></tr><% } %>
+  <% VIEW.functions.forEach(f => { %>
+    <tr>
+      <td><%= f.name %></td>
+      <td class="dim"><%= f.args %></td>
+      <td class="dim"><%= f.ret %></td>
+      <td class="dim"><%= f.language %></td>
+      <td>
+        <form method="post" action="/functions" class="d-inline">
+          <input type="hidden" name="csrf" value="<%= VIEW.session.csrf %>">
+          <input type="hidden" name="db" value="<%= VIEW.db %>">
+          <input type="hidden" name="schema" value="<%= VIEW.schema %>">
+          <input type="hidden" name="action" value="drop">
+          <input type="hidden" name="name" value="<%= f.name %>">
+          <input type="hidden" name="args" value="<%= f.args %>">
+          <button type="button" class="btn btn-link btn-sm p-0" data-confirm="Drop function <%= f.name %>?">drop</button>
+        </form>
+      </td>
+    </tr>
+  <% }) %>
+  </tbody>
+</table>
+</div>
+<%- await include('v-FOOT.ejs'); %>

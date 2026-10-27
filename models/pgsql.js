@@ -554,6 +554,104 @@ async function restartSequence(session, schema, name) {
   await pool.query(`ALTER SEQUENCE ${ident(schema)}.${ident(name)} RESTART`);
 }
 
+async function viewDef(session, schema, name) {
+  const pool = poolFor(session);
+  const r = await pool.query(
+    `SELECT pg_catalog.pg_get_viewdef(c.oid, true) AS def, c.relkind AS kind
+     FROM pg_catalog.pg_class c JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
+     WHERE n.nspname = $1 AND c.relname = $2`, [schema, name]
+  );
+  return r.rows[0] ? { def: r.rows[0].def, materialized: r.rows[0].kind === 'm' } : null;
+}
+
+async function createView(session, schema, name, body, opts) {
+  const pool = poolFor(session);
+  if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(name)) throw new Error('Invalid view name');
+  const mat = opts.materialized ? 'MATERIALIZED ' : '';
+  const rep = opts.replace ? 'OR REPLACE ' : '';
+  await pool.query(`CREATE ${rep}${mat}VIEW ${ident(schema)}.${ident(name)} AS ${body}`);
+}
+
+async function refreshView(session, schema, name) {
+  const pool = poolFor(session);
+  await pool.query(`REFRESH MATERIALIZED VIEW ${ident(schema)}.${ident(name)}`);
+}
+
+async function createSchema(session, name, owner) {
+  const pool = poolFor(session);
+  if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(name)) throw new Error('Invalid schema name');
+  await pool.query(`CREATE SCHEMA ${ident(name)}${owner ? ` AUTHORIZATION ${ident(owner)}` : ''}`);
+}
+
+async function dropSchema(session, name, cascade) {
+  const pool = poolFor(session);
+  if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(name)) throw new Error('Invalid schema name');
+  await pool.query(`DROP SCHEMA ${ident(name)}${cascade ? ' CASCADE' : ''}`);
+}
+
+async function renameSchema(session, name, newName) {
+  const pool = poolFor(session);
+  if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(name) || !/^[A-Za-z_][A-Za-z0-9_]*$/.test(newName)) throw new Error('Invalid schema name');
+  await pool.query(`ALTER SCHEMA ${ident(name)} RENAME TO ${ident(newName)}`);
+}
+
+async function listFunctions(session, schema) {
+  const pool = poolFor(session);
+  const r = await pool.query(
+    `SELECT p.proname AS name, pg_catalog.pg_get_function_identity_arguments(p.oid) AS args,
+            pg_catalog.pg_get_function_result(p.oid) AS ret, l.lanname AS language,
+            pg_catalog.pg_get_userbyid(p.proowner) AS owner
+     FROM pg_catalog.pg_proc p
+     JOIN pg_catalog.pg_namespace n ON n.oid = p.pronamespace
+     JOIN pg_catalog.pg_language l ON l.oid = p.prolang
+     WHERE n.nspname = $1 ORDER BY p.proname, args`, [schema]
+  );
+  return r.rows;
+}
+
+async function createFunction(session, sql) {
+  const pool = poolFor(session);
+  await pool.query(sql);
+}
+
+async function dropFunction(session, schema, name, args) {
+  const pool = poolFor(session);
+  if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(name)) throw new Error('Invalid function name');
+  await pool.query(`DROP FUNCTION ${ident(schema)}.${ident(name)}(${args})`);
+}
+
+async function listTypes(session, schema) {
+  const pool = poolFor(session);
+  const r = await pool.query(
+    `SELECT t.typname AS name, pg_catalog.format_type(t.oid, NULL) AS full,
+            CASE t.typtype WHEN 'e' THEN 'enum' WHEN 'c' THEN 'composite' WHEN 'd' THEN 'domain' WHEN 'r' THEN 'range' WHEN 'm' THEN 'multirange' ELSE t.typtype::text END AS kind
+     FROM pg_catalog.pg_type t
+     JOIN pg_catalog.pg_namespace n ON n.oid = t.typnamespace
+     WHERE n.nspname = $1 AND t.typtype IN ('e','c','d','r','m') AND t.typname NOT LIKE '\\_%'
+     ORDER BY t.typname`, [schema]
+  );
+  return r.rows;
+}
+
+async function createEnum(session, schema, name, values) {
+  const pool = poolFor(session);
+  if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(name)) throw new Error('Invalid type name');
+  const vals = values.map(v => lit(v)).join(', ');
+  await pool.query(`CREATE TYPE ${ident(schema)}.${ident(name)} AS ENUM (${vals})`);
+}
+
+async function addEnumValue(session, schema, name, value, opts) {
+  const pool = poolFor(session);
+  const pos = opts.before ? ` BEFORE ${lit(opts.before)}` : opts.after ? ` AFTER ${lit(opts.after)}` : '';
+  await pool.query(`ALTER TYPE ${ident(schema)}.${ident(name)} ADD VALUE ${lit(value)}${pos}`);
+}
+
+async function dropType(session, schema, name, cascade) {
+  const pool = poolFor(session);
+  if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(name)) throw new Error('Invalid type name');
+  await pool.query(`DROP TYPE ${ident(schema)}.${ident(name)}${cascade ? ' CASCADE' : ''}`);
+}
+
 export default {
   ping, close, databases, schemas, tables, primaryKey, columns, rows, rowByPk, insert, update, remove,
   execute, explain, processlist, kill, variables, status, users, grants,
@@ -562,4 +660,6 @@ export default {
   createIndex, dropIndex, renameIndex,
   deleteWhere, pks, tableDdl,
   sequenceInfo, alterSequence, nextSequence, setSequence, restartSequence,
+  viewDef, createView, refreshView, createSchema, dropSchema, renameSchema,
+  listFunctions, createFunction, dropFunction, listTypes, createEnum, addEnumValue, dropType,
 };
