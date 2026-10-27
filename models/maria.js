@@ -1,6 +1,8 @@
-// models/maria.js — MariaDB adapter (mysql2). Design A: password passed per session, never persisted.
+// models/maria.js — MariaDB/MySQL adapter (mysql2). Design A: password passed per session, never persisted.
 
 import mysql from 'mysql2/promise';
+import { existsSync } from 'fs';
+import { join } from 'path';
 
 function serverCfg(session) {
   const srv = (globalThis.w.config.servers || []).find(x => x.id === session.serverId) || {};
@@ -265,9 +267,33 @@ async function revoke(session, user, host, privs, scope) {
   await pool.query(`REVOKE ${privs} ON ${scope} FROM ${q(user)}@${q(host)}`);
 }
 
+function findBin(names) {
+  const dirs = ['/usr/bin', '/usr/local/bin', '/bin', '/usr/sbin', '/usr/local/mysql/bin'];
+  for (const n of names) {
+    for (const d of dirs) {
+      if (existsSync(join(d, n))) return join(d, n);
+    }
+  }
+  return names[names.length - 1];
+}
+
+async function flavorOf(session) {
+  if (session.mariaFlavor) return session.mariaFlavor;
+  try {
+    const pool = poolFor(session);
+    const [rows] = await pool.query('SELECT VERSION() AS v');
+    session.mariaFlavor = /mariadb/i.test(String((rows && rows[0] && rows[0].v) || '')) ? 'mariadb' : 'mysql';
+  } catch (e) {
+    session.mariaFlavor = 'mariadb';
+  }
+  return session.mariaFlavor;
+}
+
 async function dump(session, db, opts) {
   const srv = serverCfg(session);
-  const args = ['mariadb-dump', '-h', String(srv.host), '-P', String(srv.port), '-u', srv.user,
+  const flavor = await flavorOf(session);
+  const bin = findBin(flavor === 'mysql' ? ['mysqldump', 'mariadb-dump'] : ['mariadb-dump', 'mysqldump']);
+  const args = [bin, '-h', String(srv.host), '-P', String(srv.port), '-u', srv.user,
     '--single-transaction', '--default-character-set=utf8mb4', '--routines', '--events', '--triggers'];
   if (opts.structureOnly) args.push('--no-data');
   if (opts.dataOnly) args.push('--no-create-info');
@@ -279,13 +305,15 @@ async function dump(session, db, opts) {
   const out = new Uint8Array(await new Response(proc.stdout).arrayBuffer());
   const err = await new Response(proc.stderr).text();
   const code = await proc.exited;
-  if (code !== 0) throw new Error(err || `mariadb-dump exited ${code}`);
+  if (code !== 0) throw new Error(err || `${bin} exited ${code}`);
   return out;
 }
 
 async function importSql(session, db, buf) {
   const srv = serverCfg(session);
-  const args = ['mariadb', '-h', String(srv.host), '-P', String(srv.port), '-u', srv.user, db];
+  const flavor = await flavorOf(session);
+  const bin = findBin(flavor === 'mysql' ? ['mysql', 'mariadb'] : ['mariadb', 'mysql']);
+  const args = [bin, '-h', String(srv.host), '-P', String(srv.port), '-u', srv.user, db];
   const env = { PATH: process.env.PATH || '' };
   env['MYSQL_PWD'] = session.dbpass || '';
   const proc = Bun.spawn({ cmd: args, env, stdin: 'pipe', stdout: 'pipe', stderr: 'pipe' });
