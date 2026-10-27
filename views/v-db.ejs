@@ -3,16 +3,46 @@
 <% function hb(n){ n=Number(n||0); if(n<1024) return n+' B'; if(n<1048576) return (n/1024).toFixed(1)+' KB'; if(n<1073741824) return (n/1048576).toFixed(1)+' MB'; return (n/1073741824).toFixed(2)+' GB'; } %>
 <h2>Tables<% if (VIEW.db) { %> — <%= VIEW.db %><% } %>
   <a class="btn btn-sm btn-outline-secondary" href="<%= VIEW.q('/create', { db: VIEW.db, schema: VIEW.schema }) %>">Create table</a>
+  <% if (isPg) { %>
+    <a class="btn btn-sm btn-outline-secondary" href="<%= VIEW.q('/view', { db: VIEW.db, schema: VIEW.schema }) %>">Create view</a>
+    <a class="btn btn-sm btn-outline-secondary" href="<%= VIEW.q('/view', { db: VIEW.db, schema: VIEW.schema, materialized: '1' }) %>">Create mat. view</a>
+  <% } %>
 </h2>
 
 <% if (isPg && VIEW.schemas) { %>
-<form method="get" action="/db" class="form-inline mb-3">
+<form method="get" action="/db" class="form-inline mb-2">
   <input type="hidden" name="db" value="<%= VIEW.db %>">
   <label class="mr-2">Schema</label>
   <select name="schema" id="schema-select" class="custom-select custom-select-sm">
     <% VIEW.schemas.forEach(sc => { %><option value="<%= sc %>" <%= sc===VIEW.schema?'selected':'' %>><%= sc %></option><% }) %>
   </select>
 </form>
+<div class="mb-3">
+  <form method="post" action="/schemas" class="form-inline d-inline mr-3">
+    <input type="hidden" name="csrf" value="<%= VIEW.session.csrf %>">
+    <input type="hidden" name="db" value="<%= VIEW.db %>">
+    <input type="hidden" name="action" value="create">
+    <label class="mr-2">Create schema</label>
+    <input type="text" name="name" class="form-control form-control-sm mr-2" style="width:150px">
+    <button type="submit" class="btn btn-sm btn-outline-secondary">Create</button>
+  </form>
+  <form method="post" action="/schemas" class="form-inline d-inline mr-3">
+    <input type="hidden" name="csrf" value="<%= VIEW.session.csrf %>">
+    <input type="hidden" name="db" value="<%= VIEW.db %>">
+    <input type="hidden" name="action" value="rename">
+    <input type="hidden" name="name" value="<%= VIEW.schema %>">
+    <label class="mr-2">Rename schema</label>
+    <input type="text" name="newname" class="form-control form-control-sm mr-2" style="width:150px">
+    <button type="submit" class="btn btn-sm btn-outline-secondary">Rename</button>
+  </form>
+  <form method="post" action="/schemas" class="d-inline">
+    <input type="hidden" name="csrf" value="<%= VIEW.session.csrf %>">
+    <input type="hidden" name="db" value="<%= VIEW.db %>">
+    <input type="hidden" name="action" value="drop">
+    <input type="hidden" name="name" value="<%= VIEW.schema %>">
+    <button type="submit" class="btn btn-sm btn-outline-secondary" data-confirm="Drop schema <%= VIEW.schema %>?">Drop schema</button>
+  </form>
+</div>
 <% } %>
 
 <table class="adminer-table">
@@ -36,6 +66,19 @@
           <a href="<%= VIEW.q('/sequence', { db: VIEW.db, name: t.name, schema: VIEW.schema }) %>">sequence</a>
         <% } else { %>
           <a href="<%= VIEW.q('/select', { db: VIEW.db, table: t.name, schema: VIEW.schema }) %>">select</a>
+        <% } %>
+        <% if (isPg && (t.kind === 'v' || t.kind === 'm')) { %>
+          <a href="<%= VIEW.q('/view', { db: VIEW.db, name: t.name, schema: VIEW.schema, alter: '1' }) %>">alter</a>
+          <% if (t.kind === 'm') { %>
+            <form method="post" action="/view" class="d-inline">
+              <input type="hidden" name="csrf" value="<%= VIEW.session.csrf %>">
+              <input type="hidden" name="db" value="<%= VIEW.db %>">
+              <input type="hidden" name="schema" value="<%= VIEW.schema %>">
+              <input type="hidden" name="name" value="<%= t.name %>">
+              <input type="hidden" name="action" value="refresh">
+              <button type="submit" class="btn btn-link btn-sm p-0">refresh</button>
+            </form>
+          <% } %>
         <% } %>
         <% if (!isSqlite) { %>
           <form method="post" action="/drop" class="d-inline">

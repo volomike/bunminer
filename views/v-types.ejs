@@ -1,0 +1,54 @@
+<%- await include('v-HEAD.ejs'); %>
+<h2>Types</h2>
+
+<h3>Create enum type</h3>
+<form method="post" action="/types" class="mb-4">
+  <input type="hidden" name="csrf" value="<%= VIEW.session.csrf %>">
+  <input type="hidden" name="db" value="<%= VIEW.db %>">
+  <input type="hidden" name="schema" value="<%= VIEW.schema %>">
+  <input type="hidden" name="action" value="create">
+  <div class="form-inline mb-2">
+    <label class="mr-2">Name</label><input type="text" name="name" class="form-control form-control-sm mr-3" required style="width:180px">
+    <label class="mr-2">Values (comma-separated)</label><input type="text" name="values" class="form-control form-control-sm" required style="width:300px">
+  </div>
+  <button type="submit" class="btn btn-sm btn-primary">Create</button>
+</form>
+
+<h3>Existing</h3>
+<div class="table-responsive">
+<table class="adminer-table">
+  <thead><tr><th>Name</th><th>Kind</th><th>Definition</th><th></th></tr></thead>
+  <tbody>
+  <% if (!VIEW.types.length) { %><tr><td colspan="4" class="dim">none</td></tr><% } %>
+  <% VIEW.types.forEach(t => { %>
+    <tr>
+      <td><%= t.name %></td>
+      <td class="dim"><%= t.kind %></td>
+      <td class="dim"><%= t.full %></td>
+      <td>
+        <% if (t.kind === 'enum') { %>
+          <form method="post" action="/types" class="form-inline d-inline mr-2">
+            <input type="hidden" name="csrf" value="<%= VIEW.session.csrf %>">
+            <input type="hidden" name="db" value="<%= VIEW.db %>">
+            <input type="hidden" name="schema" value="<%= VIEW.schema %>">
+            <input type="hidden" name="action" value="addvalue">
+            <input type="hidden" name="name" value="<%= t.name %>">
+            <input type="text" name="value" class="form-control form-control-sm mr-1" placeholder="new value" style="width:110px">
+            <button type="submit" class="btn btn-sm btn-outline-secondary">Add value</button>
+          </form>
+        <% } %>
+        <form method="post" action="/types" class="d-inline">
+          <input type="hidden" name="csrf" value="<%= VIEW.session.csrf %>">
+          <input type="hidden" name="db" value="<%= VIEW.db %>">
+          <input type="hidden" name="schema" value="<%= VIEW.schema %>">
+          <input type="hidden" name="action" value="drop">
+          <input type="hidden" name="name" value="<%= t.name %>">
+          <button type="button" class="btn btn-link btn-sm p-0" data-confirm="Drop type <%= t.name %>?">drop</button>
+        </form>
+      </td>
+    </tr>
+  <% }) %>
+  </tbody>
+</table>
+</div>
+<%- await include('v-FOOT.ejs'); %>

@@ -39,6 +39,10 @@
     <a href="/status">Status</a>
     <a href="/privileges">Privileges</a>
   <% } %>
+  <% if (VIEW.session && VIEW.session.engine === 'pgsql') { %>
+    <a href="/functions">Functions</a>
+    <a href="/types">Types</a>
+  <% } %>
   <a href="/history">History</a>
   <a href="/logout" class="right">Logout</a>
 </nav>

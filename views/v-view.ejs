@@ -1,0 +1,20 @@
+<%- await include('v-HEAD.ejs'); %>
+<h2><%= VIEW.isAlter ? 'Alter' : 'Create' %> <%= VIEW.materialized ? 'materialized view' : 'view' %></h2>
+<form method="post" action="/view">
+  <input type="hidden" name="csrf" value="<%= VIEW.session.csrf %>">
+  <input type="hidden" name="db" value="<%= VIEW.db %>">
+  <input type="hidden" name="schema" value="<%= VIEW.schema %>">
+  <input type="hidden" name="materialized" value="<%= VIEW.materialized ? '1' : '0' %>">
+  <input type="hidden" name="replace" value="<%= VIEW.isAlter ? '1' : '0' %>">
+  <div class="form-inline mb-3">
+    <label class="mr-2">Name</label>
+    <input type="text" name="name" class="form-control form-control-sm" value="<%= VIEW.name %>" <%= VIEW.isAlter ? 'readonly' : 'required' %> style="width:240px">
+  </div>
+  <div class="mb-3">
+    <label class="d-block">AS</label>
+    <textarea name="body" class="form-control" rows="12" style="font-family:monospace"><%= VIEW.body %></textarea>
+  </div>
+  <button type="submit" class="btn btn-sm btn-primary">Save</button>
+  <a class="btn btn-sm btn-outline-secondary" href="<%= VIEW.q('/db', { db: VIEW.db, schema: VIEW.schema }) %>">Cancel</a>
+</form>
+<%- await include('v-FOOT.ejs'); %>
