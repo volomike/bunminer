@@ -44,7 +44,7 @@ export default async function({ w, VIEW }) {
   VIEW.sortCol = sortCol;
   VIEW.sortDir = sortDir;
   VIEW.quoteIdent = (x) => s.engine === 'maria' ? '`' + String(x).replace(/`/g, '``') + '`' : '"' + String(x).replace(/"/g, '""') + '"';
-  VIEW.sortOrderFor = (c) => (/^[A-Za-z_][A-Za-z0-9_]*$/.test(c) ? c : VIEW.quoteIdent(c));
+  VIEW.sortOrderFor = (c) => (s.engine === 'pgsql' || !/^[A-Za-z_][A-Za-z0-9_]*$/.test(c) ? VIEW.quoteIdent(c) : c);
 
   try {
     const info = await adapter.columns(s, ns, table);
