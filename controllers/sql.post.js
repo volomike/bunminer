@@ -63,6 +63,9 @@ export default async function({ w, VIEW }) {
     }
   }
 
+  // a non-grid result (DML, complex query, explain) replaces any previous grid
+  s.sqlResult = null;
+
   VIEW.title = 'SQL command';
   VIEW.session = s;
   VIEW.db = db;
