@@ -24,13 +24,16 @@ function baseCfg(session) {
     connectionTimeoutMillis: 8000,
     application_name: 'dbxadm2',
   };
+  if (session.db) cfg['database'] = session.db;
   cfg['password'] = session.dbpass || '';
   return cfg;
 }
 
 function poolFor(session) {
-  if (session._pgPool) return session._pgPool;
+  if (session._pgPool && session._pgPoolDb === session.db) return session._pgPool;
+  if (session._pgPool) { session._pgPool.end().catch(() => {}); }
   session._pgPool = new pg.Pool(baseCfg(session));
+  session._pgPoolDb = session.db;
   return session._pgPool;
 }
 
