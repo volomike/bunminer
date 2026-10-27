@@ -1,0 +1,73 @@
+<%- await include('v-HEAD.ejs'); %>
+<h2>Sequence: <%= VIEW.name %></h2>
+
+<% if (VIEW.seq) { %>
+<table class="adminer-table" style="width:auto">
+  <tbody>
+    <tr><th>Current value</th><td><%= VIEW.seq.isCalled ? VIEW.seq.currentValue : '(not started)' %></td></tr>
+    <tr><th>Data type</th><td><%= VIEW.seq.data_type %></td></tr>
+    <tr><th>Owner</th><td><%= VIEW.seq.owner %></td></tr>
+    <tr><th>Start</th><td><%= VIEW.seq.start_value %></td></tr>
+    <tr><th>Increment</th><td><%= VIEW.seq.increment_by %></td></tr>
+    <tr><th>Min value</th><td><%= VIEW.seq.min_value %></td></tr>
+    <tr><th>Max value</th><td><%= VIEW.seq.max_value %></td></tr>
+    <tr><th>Cache</th><td><%= VIEW.seq.cache_size %></td></tr>
+    <tr><th>Cycle</th><td><%= VIEW.seq.cycle ? 'yes' : 'no' %></td></tr>
+  </tbody>
+</table>
+
+<h3>Alter sequence</h3>
+<form method="post" action="/sequence" class="form-inline mb-3">
+  <input type="hidden" name="csrf" value="<%= VIEW.session.csrf %>">
+  <input type="hidden" name="db" value="<%= VIEW.db %>">
+  <input type="hidden" name="schema" value="<%= VIEW.schema %>">
+  <input type="hidden" name="name" value="<%= VIEW.name %>">
+  <input type="hidden" name="action" value="alter">
+  <label class="mr-2">Increment</label>
+  <input type="text" name="increment" class="form-control form-control-sm mr-3" style="width:90px">
+  <label class="mr-2">Min</label>
+  <input type="text" name="min" class="form-control form-control-sm mr-3" style="width:90px">
+  <label class="mr-2">Max</label>
+  <input type="text" name="max" class="form-control form-control-sm mr-3" style="width:90px">
+  <label class="mr-2">Cache</label>
+  <input type="text" name="cache" class="form-control form-control-sm mr-3" style="width:90px">
+  <div class="custom-control custom-checkbox custom-control-inline mr-3">
+    <input type="checkbox" class="custom-control-input" id="seq-cycle" name="cycle" value="1" <%= VIEW.seq.cycle ? 'checked' : '' %>>
+    <label class="custom-control-label" for="seq-cycle">cycle</label>
+  </div>
+  <button type="submit" class="btn btn-sm btn-primary">Alter</button>
+</form>
+
+<h3>Actions</h3>
+<div class="mb-3">
+  <form method="post" action="/sequence" class="d-inline mr-2">
+    <input type="hidden" name="csrf" value="<%= VIEW.session.csrf %>">
+    <input type="hidden" name="db" value="<%= VIEW.db %>">
+    <input type="hidden" name="schema" value="<%= VIEW.schema %>">
+    <input type="hidden" name="name" value="<%= VIEW.name %>">
+    <input type="hidden" name="action" value="next">
+    <button type="submit" class="btn btn-sm btn-outline-secondary">Next value</button>
+  </form>
+  <form method="post" action="/sequence" class="d-inline mr-2">
+    <input type="hidden" name="csrf" value="<%= VIEW.session.csrf %>">
+    <input type="hidden" name="db" value="<%= VIEW.db %>">
+    <input type="hidden" name="schema" value="<%= VIEW.schema %>">
+    <input type="hidden" name="name" value="<%= VIEW.name %>">
+    <input type="hidden" name="action" value="restart">
+    <button type="submit" class="btn btn-sm btn-outline-secondary" data-confirm="Restart this sequence?">Restart</button>
+  </form>
+  <form method="post" action="/sequence" class="form-inline d-inline">
+    <input type="hidden" name="csrf" value="<%= VIEW.session.csrf %>">
+    <input type="hidden" name="db" value="<%= VIEW.db %>">
+    <input type="hidden" name="schema" value="<%= VIEW.schema %>">
+    <input type="hidden" name="name" value="<%= VIEW.name %>">
+    <input type="hidden" name="action" value="set">
+    <label class="mr-2">Set value</label>
+    <input type="text" name="value" class="form-control form-control-sm mr-2" style="width:120px">
+    <button type="submit" class="btn btn-sm btn-outline-secondary">Set</button>
+  </form>
+</div>
+<% } else { %>
+<p class="dim">Sequence not found.</p>
+<% } %>
+<%- await include('v-FOOT.ejs'); %>

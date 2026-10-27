@@ -22,13 +22,21 @@
   <% VIEW.tables.forEach(t => { %>
     <tr>
       <td>
-        <a href="<%= VIEW.q('/table', { db: VIEW.db, table: t.name, schema: VIEW.schema }) %>"><%= t.name %></a>
+        <% if (isPg && t.kind === 'S') { %>
+          <a href="<%= VIEW.q('/sequence', { db: VIEW.db, name: t.name, schema: VIEW.schema }) %>"><%= t.name %></a>
+        <% } else { %>
+          <a href="<%= VIEW.q('/table', { db: VIEW.db, table: t.name, schema: VIEW.schema }) %>"><%= t.name %></a>
+        <% } %>
       </td>
       <td class="dim"><%= t.kindLabel || t.type || t.ENGINE %></td>
       <td class="num"><%= t.rows %></td>
       <td class="num"><%= hb(t.bytes) %></td>
       <td>
-        <a href="<%= VIEW.q('/select', { db: VIEW.db, table: t.name, schema: VIEW.schema }) %>">select</a>
+        <% if (isPg && t.kind === 'S') { %>
+          <a href="<%= VIEW.q('/sequence', { db: VIEW.db, name: t.name, schema: VIEW.schema }) %>">sequence</a>
+        <% } else { %>
+          <a href="<%= VIEW.q('/select', { db: VIEW.db, table: t.name, schema: VIEW.schema }) %>">select</a>
+        <% } %>
         <% if (!isSqlite) { %>
           <form method="post" action="/drop" class="d-inline">
             <input type="hidden" name="csrf" value="<%= VIEW.session.csrf %>">
