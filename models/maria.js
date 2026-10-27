@@ -164,19 +164,26 @@ async function execute(session, db, sql) {
   const cfg = Object.assign({ database: db, multipleStatements: true }, baseCfg(session));
   const conn = await mysql.createConnection(cfg);
   try {
-    const [results] = await conn.query(sql);
-    const list = Array.isArray(results) ? results : [results];
-    return list.map(res => {
-      if (Array.isArray(res)) {
-        const [rows, fields] = res;
-        const columns = (fields && fields.map(f => f.name)) || Object.keys(rows[0] || {});
-        return { type: 'result', columns, rows: rows || [] };
-      }
-      return { type: 'ok', affectedRows: res.affectedRows, info: res.info || res.message || '' };
-    });
+    const [results, fields] = await conn.query(sql);
+    return normalizeMysql(results, fields);
   } finally {
     await conn.end().catch(() => {});
   }
+}
+
+function normalizeMysql(results, fields) {
+  const isSingleSelect = Array.isArray(fields) && fields.length > 0 && fields[0] && !Array.isArray(fields[0]) && fields[0].name !== undefined;
+  if (isSingleSelect) {
+    return [{ type: 'result', columns: fields.map(f => f.name), rows: results }];
+  }
+  if (!Array.isArray(fields) || fields.length === 0) {
+    return [{ type: 'ok', affectedRows: results.affectedRows, info: results.info || results.message || '' }];
+  }
+  return results.map((r, i) => {
+    const f = fields[i];
+    if (Array.isArray(f)) return { type: 'result', columns: f.map(x => x.name), rows: r };
+    return { type: 'ok', affectedRows: r.affectedRows, info: r.info || r.message || '' };
+  });
 }
 
 async function explain(session, db, sql) {

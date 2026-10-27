@@ -188,8 +188,8 @@ async function execute(session, schema, sql) {
   const client = new pg.Client(Object.assign({}, baseCfg(session)));
   await client.connect();
   try {
-    const set = schema ? `SET search_path TO ${ident(schema)}, public; ` : '';
-    const res = await client.query(set + sql);
+    if (schema) await client.query(`SET search_path TO ${ident(schema)}, public`);
+    const res = await client.query(sql);
     const list = Array.isArray(res) ? res : [res];
     return list.map(r => {
       if (r.fields) return { type: 'result', columns: r.fields.map(f => f.name), rows: r.rows || [] };
