@@ -4,7 +4,6 @@
 <% function wrapCell(s, isCode){ if(s.length > 40){ return '<span class="cell-trunc" title="'+esc(s)+'">' + (isCode ? '<code>'+esc(s)+'</code>' : esc(s)) + '</span>'; } return isCode ? '<code>'+esc(s)+'</code>' : esc(s); } %>
 <% function cell(v){ if(v===null||v===undefined) return '<i class="null">NULL</i>'; if(typeof v==='number'||typeof v==='boolean') return esc(v); if(typeof v==='bigint') return esc(String(v)); if(v instanceof Uint8Array || (typeof Buffer!=='undefined' && Buffer.isBuffer(v))) return '<span class="dim">blob ('+v.length+' B)</span>'; if(typeof v==='object'){ try{ return wrapCell(JSON.stringify(v), true); }catch(e){ return wrapCell(String(v), false); } } return wrapCell(String(v), false); } %>
 <h2>SQL command</h2>
-<% if (VIEW.warn) { %><div class="adminer-error">⚠ <%= VIEW.warn %></div><% } %>
 
 <form method="post" action="/sql" class="mb-3">
   <input type="hidden" name="csrf" value="<%= VIEW.session.csrf %>">
@@ -18,18 +17,86 @@
   <button type="submit" class="btn btn-sm btn-primary">Execute</button>
 </form>
 
+<% if (VIEW.warn) { %><div class="adminer-error">⚠ <%= VIEW.warn %></div><% } %>
+
+<% if (VIEW.grid) { %>
+  <% if (VIEW.grid.truncated) { %><div class="adminer-msg">Result truncated to the first <%= VIEW.grid.rows.length %> rows.</div><% } %>
+
+  <form id="bulk-form" method="post" action="/sql-action" class="mb-2">
+    <input type="hidden" name="csrf" value="<%= VIEW.session.csrf %>">
+    <input type="hidden" name="rows" id="bulk-rows">
+    <input type="hidden" id="sel-key" value="<%= VIEW.selKey %>">
+    <label class="mr-2">With Selected Items:</label>
+    <select name="action" id="bulk-action" class="custom-select custom-select-sm d-inline-block mr-2" style="width:auto">
+      <option value="delete">Delete</option>
+      <option value="export">Export</option>
+    </select>
+    <button type="submit" class="btn btn-sm btn-outline-secondary">Do</button>
+    <span id="sel-count" class="dim ml-2"></span>
+  </form>
+
+  <form method="get" action="/sql" class="form-inline mb-2">
+    <label class="mr-2">Rows per page</label>
+    <select name="limit" class="custom-select custom-select-sm mr-2">
+      <% VIEW.limitOptions.forEach(n => { %><option value="<%= n %>" <%= VIEW.limit===n?'selected':'' %>><%= n %></option><% }) %>
+    </select>
+  </form>
+
+  <div class="table-responsive">
+  <table class="adminer-table">
+    <thead><tr><th><input type="checkbox" class="select-all-page"></th><th></th><% VIEW.columns.forEach(c => { %><th><%= c %></th><% }) %></tr></thead>
+    <tbody>
+    <% if (!VIEW.rows.length) { %><tr><td colspan="<%= VIEW.columns.length + 2 %>" class="dim">No rows</td></tr><% } %>
+    <% VIEW.rows.forEach(r => { %>
+      <tr>
+        <td><input type="checkbox" class="row-sel" data-key="<%= r.key %>"></td>
+        <td><% if (r.editUrl) { %><a href="<%= r.editUrl %>">edit</a><% } %></td>
+        <% r.cells.forEach(c => { %>
+          <td>
+            <% if (c.kind === 'null') { %><i class="null">NULL</i>
+            <% } else if (c.kind === 'blob') { %><span class="dim">blob (<%= c.bytes %> B)</span>
+            <% } else if (c.kind === 'json') { %>
+              <% if (c.text.length > 40) { %><code class="cell-trunc" title="<%= c.text %>"><%= c.text %></code>
+              <% } else { %><code><%= c.text %></code><% } %>
+            <% } else { %>
+              <% if (c.text.length > 40) { %><span class="cell-trunc" title="<%= c.text %>"><%= c.text %></span>
+              <% } else { %><%= c.text %><% } %>
+            <% } %>
+          </td>
+        <% }) %>
+      </tr>
+    <% }) %>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="pagination">
+    <% if (VIEW.offset > 0) { %>
+      <a href="<%= VIEW.q('/sql', { limit: VIEW.limit, offset: 0 }) %>">first</a>
+      <a href="<%= VIEW.q('/sql', { limit: VIEW.limit, offset: Math.max(0, VIEW.offset - VIEW.limit) }) %>">prev</a>
+    <% } %>
+    <span>rows <%= VIEW.offset + 1 %>–<%= Math.min(VIEW.offset + VIEW.limit, VIEW.total) %> of <%= VIEW.total %></span>
+    <% if (VIEW.offset + VIEW.limit < VIEW.total) { %>
+      <a href="<%= VIEW.q('/sql', { limit: VIEW.limit, offset: VIEW.offset + VIEW.limit }) %>">next</a>
+      <a href="<%= VIEW.q('/sql', { limit: VIEW.limit, offset: Math.floor((VIEW.total - 1) / VIEW.limit) * VIEW.limit }) %>">last</a>
+    <% } %>
+  </div>
+<% } %>
+
 <% if (VIEW.results) { %>
   <% VIEW.results.forEach(r => { %>
     <% if (r.type === 'ok') { %>
       <div class="adminer-msg">OK<%= r.affectedRows !== undefined ? ' — ' + r.affectedRows + ' row(s) affected' : '' %><%= r.info ? ' — ' + r.info : '' %><%= r.command ? ' — ' + r.command : '' %></div>
     <% } else { %>
       <% if (r.truncated) { %><div class="adminer-msg">Showing first 1000 rows (truncated)</div><% } %>
-      <div class="table-responsive"><table class="adminer-table">
+      <div class="table-responsive">
+      <table class="adminer-table">
         <thead><tr><% r.columns.forEach(c => { %><th><%= c %></th><% }) %></tr></thead>
         <tbody>
         <% r.rows.forEach(row => { %><tr><% r.columns.forEach(c => { %><td><%- cell(row[c]) %></td><% }) %></tr><% }) %>
         </tbody>
-      </table></div>
+      </table>
+      </div>
     <% } %>
   <% }) %>
 <% } %>

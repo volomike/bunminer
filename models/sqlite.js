@@ -137,9 +137,10 @@ async function execute(session, _schema, sql) {
   const db = open(session);
   try {
     const stmt = sql.trim();
-    const single = !stmt.includes(';');
-    if (single && /^(select|with|pragma|explain|values)\b/i.test(stmt)) {
-      const rows = db.query(stmt).all();
+    const cleaned = stmt.replace(/;+\s*$/, '').trim();
+    const single = !cleaned.includes(';');
+    if (single && /^(select|with|pragma|explain|values)\b/i.test(cleaned)) {
+      const rows = db.query(cleaned).all();
       return [{ type: 'result', columns: rows[0] ? Object.keys(rows[0]) : [], rows }];
     }
     db.exec(stmt);
