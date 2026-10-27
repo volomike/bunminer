@@ -8,7 +8,7 @@
   <input type="hidden" name="table" value="<%= VIEW.table %>">
   <input type="text" name="where" class="form-control form-control-sm mr-2" placeholder="WHERE" value="<%= VIEW.where %>">
   <input type="text" name="order" class="form-control form-control-sm mr-2" placeholder="ORDER BY (e.g. id ASC, name DESC)" value="<%= VIEW.order %>">
-  <select name="limit" class="form-control form-control-sm mr-2">
+  <select name="limit" class="custom-select custom-select-sm mr-2">
     <% VIEW.limitOptions.forEach(n => { %><option value="<%= n %>" <%= VIEW.limit===n?'selected':'' %>><%= n %></option><% }) %>
   </select>
   <button class="btn btn-sm btn-outline-secondary">Apply</button>
@@ -23,7 +23,7 @@
   <input type="hidden" name="rows" id="bulk-rows">
   <input type="hidden" id="sel-key" value="<%= VIEW.selKey %>">
   <label class="mr-2">With Selected Items:</label>
-  <select name="action" id="bulk-action" class="form-control form-control-sm d-inline-block mr-2" style="width:auto">
+  <select name="action" id="bulk-action" class="custom-select custom-select-sm d-inline-block mr-2" style="width:auto">
     <option value="delete">Delete</option>
     <option value="export">Export</option>
   </select>

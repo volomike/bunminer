@@ -15,7 +15,7 @@
     <form method="post" action="/login">
       <div class="form-group">
         <label for="driver">System</label>
-        <select name="driver" id="driver" class="form-control">
+        <select name="driver" id="driver" class="custom-select">
           <% VIEW.servers.forEach(sv => { %>
             <option value="<%= sv.id %>" <%= sv.id === VIEW.driver ? 'selected' : '' %>><%= sv.label %></option>
           <% }) %>

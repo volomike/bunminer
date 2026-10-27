@@ -9,7 +9,7 @@
 <form method="get" action="/db" class="form-inline mb-3">
   <input type="hidden" name="db" value="<%= VIEW.db %>">
   <label class="mr-2">Schema</label>
-  <select name="schema" id="schema-select" class="form-control form-control-sm">
+  <select name="schema" id="schema-select" class="custom-select custom-select-sm">
     <% VIEW.schemas.forEach(sc => { %><option value="<%= sc %>" <%= sc===VIEW.schema?'selected':'' %>><%= sc %></option><% }) %>
   </select>
 </form>
