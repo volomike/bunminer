@@ -11,9 +11,9 @@
   <% if (!isSqlite) { %><input type="hidden" name="db" value="<%= VIEW.db %>"><% } %>
   <% if (isPg) { %><input type="hidden" name="schema" value="<%= VIEW.schema %>"><% } %>
   <textarea name="sql" class="form-control" rows="8" style="font-family:monospace"><%= VIEW.sql %></textarea>
-  <div class="form-check my-2">
-    <input type="checkbox" name="explain" value="1" class="form-check-input" id="explain" <%= VIEW.explain ? 'checked' : '' %>>
-    <label class="form-check-label" for="explain">Explain</label>
+  <div class="custom-control custom-checkbox my-2">
+    <input type="checkbox" name="explain" value="1" class="custom-control-input" id="explain" <%= VIEW.explain ? 'checked' : '' %>>
+    <label class="custom-control-label" for="explain">Explain</label>
   </div>
   <button type="submit" class="btn btn-sm btn-primary">Execute</button>
 </form>

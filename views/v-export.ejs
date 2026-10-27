@@ -18,9 +18,9 @@
   </table>
   <% } %>
 
-  <div class="form-check"><input type="checkbox" name="structure" value="1" class="form-check-input" id="structure"><label class="form-check-label" for="structure">Structure</label></div>
-  <div class="form-check"><input type="checkbox" name="data" value="1" class="form-check-input" id="data"><label class="form-check-label" for="data">Data</label></div>
-  <div class="form-check"><input type="checkbox" name="gzip" value="1" class="form-check-input" id="gzip" checked><label class="form-check-label" for="gzip">gzip</label></div>
+  <div class="custom-control custom-checkbox"><input type="checkbox" name="structure" value="1" class="custom-control-input" id="structure"><label class="custom-control-label" for="structure">Structure</label></div>
+  <div class="custom-control custom-checkbox"><input type="checkbox" name="data" value="1" class="custom-control-input" id="data"><label class="custom-control-label" for="data">Data</label></div>
+  <div class="custom-control custom-checkbox"><input type="checkbox" name="gzip" value="1" class="custom-control-input" id="gzip" checked><label class="custom-control-label" for="gzip">gzip</label></div>
   <button type="submit" class="btn btn-sm btn-primary">Download</button>
 </form>
 <%- await include('v-FOOT.ejs'); %>

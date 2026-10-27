@@ -421,9 +421,30 @@ async function editColumn(session, schema, table, oldName, c) {
   for (const s of stmts) await pool.query(s);
 }
 
+async function createIndex(session, schema, table, name, columns, unique) {
+  const pool = poolFor(session);
+  if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(name)) throw new Error('Invalid index name');
+  if (!columns.length) throw new Error('Specify at least one column');
+  const cols = columns.map(c => ident(c)).join(', ');
+  await pool.query(`CREATE ${unique ? 'UNIQUE ' : ''}INDEX ${ident(name)} ON ${ident(schema)}.${ident(table)} (${cols})`);
+}
+
+async function dropIndex(session, schema, table, name) {
+  const pool = poolFor(session);
+  if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(name)) throw new Error('Invalid index name');
+  await pool.query(`DROP INDEX ${ident(schema)}.${ident(name)}`);
+}
+
+async function renameIndex(session, schema, table, oldName, newName) {
+  const pool = poolFor(session);
+  if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(oldName) || !/^[A-Za-z_][A-Za-z0-9_]*$/.test(newName)) throw new Error('Invalid index name');
+  await pool.query(`ALTER INDEX ${ident(schema)}.${ident(oldName)} RENAME TO ${ident(newName)}`);
+}
+
 export default {
   ping, close, databases, schemas, tables, primaryKey, columns, rows, rowByPk, insert, update, remove,
   execute, explain, processlist, kill, variables, status, users, grants,
   createRole, dropRole, alterRole, grant, revoke, dump, importSql, blob, dropTable, truncate, exportRows,
   createTable, addColumn, dropColumn, editColumn,
+  createIndex, dropIndex, renameIndex,
 };

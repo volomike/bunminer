@@ -85,9 +85,9 @@
   <input type="hidden" name="action" value="create-role">
   <input type="text" name="name" class="form-control form-control-sm mr-2" placeholder="role name" required>
   <input type="password" name="pass" class="form-control form-control-sm mr-2" placeholder="password">
-  <label class="mr-2"><input type="checkbox" name="login" value="1" checked> login</label>
-  <label class="mr-2"><input type="checkbox" name="superuser" value="1"> superuser</label>
-  <label class="mr-2"><input type="checkbox" name="createdb" value="1"> createdb</label>
+  <div class="custom-control custom-checkbox custom-control-inline"><input type="checkbox" name="login" value="1" checked class="custom-control-input" id="role-login"><label class="custom-control-label" for="role-login">login</label></div>
+  <div class="custom-control custom-checkbox custom-control-inline"><input type="checkbox" name="superuser" value="1" class="custom-control-input" id="role-super"><label class="custom-control-label" for="role-super">superuser</label></div>
+  <div class="custom-control custom-checkbox custom-control-inline"><input type="checkbox" name="createdb" value="1" class="custom-control-input" id="role-createdb"><label class="custom-control-label" for="role-createdb">createdb</label></div>
   <button class="btn btn-sm btn-primary">Create</button>
 </form>
 <h3>Grant / revoke</h3>

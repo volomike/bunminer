@@ -8,6 +8,8 @@
   <a href="<%= VIEW.q('/insert', { db: VIEW.db, table: VIEW.table, schema: VIEW.schema }) %>">New item</a>
   <span class="dim">·</span>
   <a href="<%= VIEW.q('/alter-column', { db: VIEW.db, table: VIEW.table, schema: VIEW.schema }) %>">Add column</a>
+  <span class="dim">·</span>
+  <a href="<%= VIEW.q('/indexes', { db: VIEW.db, table: VIEW.table, schema: VIEW.schema }) %>">Add index</a>
 </p>
 
 <% if (isMar) { %>
@@ -60,14 +62,30 @@
 <h3>Indexes</h3>
 <div class="table-responsive">
 <table class="adminer-table">
-  <thead><tr><th>Name</th><th>Unique</th><th>Columns / definition</th></tr></thead>
+  <thead><tr><th>Name</th><th>Unique</th><th>Columns / definition</th><th></th></tr></thead>
   <tbody>
-  <% if (!(VIEW.info.indexes||[]).length) { %><tr><td colspan="3" class="dim">none</td></tr><% } %>
+  <% if (!(VIEW.info.indexes||[]).length) { %><tr><td colspan="4" class="dim">none</td></tr><% } %>
   <% (VIEW.info.indexes||[]).forEach(i => { %>
+    <% const iname = i.Key_name || i.name; %>
+    <% const isPrimary = (i.Key_name === 'PRIMARY') || i.primary === true || i.origin === 'pk'; %>
     <tr>
-      <td><%= i.Key_name || i.name %></td>
-      <td><%= i.Non_unique === 0 || i.unique || i.primary ? 'yes' : '' %></td>
+      <td><%= iname %></td>
+      <td><%= i.Non_unique === 0 || i.unique ? 'yes' : '' %></td>
       <td class="dim"><%= i.Column_name || i.def || '' %></td>
+      <td>
+        <% if (!isPrimary) { %>
+          <% if (!isSqlite) { %><a href="<%= VIEW.q('/indexes', { db: VIEW.db, table: VIEW.table, schema: VIEW.schema, name: iname }) %>">rename</a><% } %>
+          <form method="post" action="/indexes" class="d-inline">
+            <input type="hidden" name="csrf" value="<%= VIEW.session.csrf %>">
+            <% if (!isSqlite) { %><input type="hidden" name="db" value="<%= VIEW.db %>"><% } %>
+            <% if (isPg) { %><input type="hidden" name="schema" value="<%= VIEW.schema %>"><% } %>
+            <input type="hidden" name="table" value="<%= VIEW.table %>">
+            <input type="hidden" name="action" value="drop">
+            <input type="hidden" name="name" value="<%= iname %>">
+            <button type="button" class="btn btn-link btn-sm p-0" data-confirm="Drop index <%= iname %>?">drop</button>
+          </form>
+        <% } %>
+      </td>
     </tr>
   <% }) %>
   </tbody>

@@ -12,7 +12,7 @@
     <input type="text" name="name" class="form-control form-control-sm mr-3" required pattern="[A-Za-z_][A-Za-z0-9_]*" title="letters, digits and underscores" autofocus>
     <% if (isMar) { %>
       <label class="mr-2">Engine</label>
-      <select name="engine" class="form-control form-control-sm">
+      <select name="engine" class="custom-select custom-select-sm" style="width:140px">
         <% ['InnoDB', 'Aria', 'MyISAM'].forEach(e => { %><option value="<%= e %>"><%= e %></option><% }) %>
       </select>
     <% } %>
@@ -27,7 +27,11 @@
     <tbody id="cols-rows">
       <tr data-col>
         <td><input type="text" name="c[0][name]" class="form-control form-control-sm" style="width:140px"></td>
-        <td><input type="text" name="c[0][type]" class="form-control form-control-sm" list="types" style="width:150px"></td>
+        <td>
+          <select name="c[0][type]" class="custom-select custom-select-sm" style="width:170px">
+            <% VIEW.types.forEach(t => { %><option value="<%= t %>"><%= t %></option><% }) %>
+          </select>
+        </td>
         <td><input type="text" name="c[0][length]" class="form-control form-control-sm" style="width:70px"></td>
         <% if (isMar) { %>
           <td><input type="checkbox" name="c[0][unsigned]" value="1"></td>
@@ -41,10 +45,6 @@
   </table>
   <button type="button" id="add-col" class="btn btn-sm btn-outline-secondary mb-3">Add column</button>
 
-  <datalist id="types">
-    <% VIEW.types.forEach(t => { %><option value="<%= t %>"></option><% }) %>
-  </datalist>
-
   <div>
     <button type="submit" class="btn btn-sm btn-primary">Create table</button>
   </div>
@@ -53,7 +53,11 @@
 <script type="text/template" id="col-row-tpl">
   <tr data-col>
     <td><input type="text" name="c[__IDX__][name]" class="form-control form-control-sm" style="width:140px"></td>
-    <td><input type="text" name="c[__IDX__][type]" class="form-control form-control-sm" list="types" style="width:150px"></td>
+    <td>
+      <select name="c[__IDX__][type]" class="custom-select custom-select-sm" style="width:170px">
+        <% VIEW.types.forEach(t => { %><option value="<%= t %>"><%= t %></option><% }) %>
+      </select>
+    </td>
     <td><input type="text" name="c[__IDX__][length]" class="form-control form-control-sm" style="width:70px"></td>
     <% if (isMar) { %>
       <td><input type="checkbox" name="c[__IDX__][unsigned]" value="1"></td>
