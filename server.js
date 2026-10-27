@@ -18,7 +18,7 @@ app.onRequest(({ set }) => {
   set.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains';
   set.headers['Cache-Control'] = 'no-store';
   set.headers['Content-Security-Policy'] =
-    "default-src 'self'; script-src 'self' https://code.jquery.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; img-src 'self' data:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'";
+    "default-src 'self'; script-src 'self' https://code.jquery.com https://cdn.jsdelivr.net https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; img-src 'self' data:; connect-src 'self' https://cdn.jsdelivr.net https://code.jquery.com https://static.cloudflareinsights.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'";
 });
 
 setupStatic(app, { BASEPATH });
