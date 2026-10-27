@@ -14,7 +14,7 @@
   <h1>BunDB Panel <small>v<%= VIEW.CORDOVA_VERSION %></small></h1>
   <div class="adminer-user">
     <% if (VIEW.session) { %>
-      <span><%= VIEW.session.engine %> · <%= VIEW.session.username || 'sqlite' %></span>
+      <span><%= VIEW.session.platform || VIEW.session.engine %> · <%= VIEW.session.username || 'sqlite' %><% if (VIEW.session.host) { %> @ <%= VIEW.session.host %><% } %></span>
     <% } %>
   </div>
 </header>

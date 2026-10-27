@@ -60,7 +60,10 @@ export default async function({ w, VIEW }) {
   }
 
   w.m.guard.success(ip, userKey);
-  w.m.session.start(w, { engine: srv.engine, serverId: srv.id, username, dbpass, db: db || null, permanent });
+  const platform = srv.engine === 'maria'
+    ? (probe.mariaFlavor === 'mysql' ? 'MySQL' : 'MariaDB')
+    : srv.engine === 'pgsql' ? 'PostgreSQL' : 'SQLite';
+  w.m.session.start(w, { engine: srv.engine, serverId: srv.id, username, dbpass, db: db || null, permanent, platform, host: srv.host || '', mariaFlavor: probe.mariaFlavor || null });
   if (db) return w.m.session.redirect(w, '/db' + (srv.engine === 'sqlite' ? '' : '?db=' + encodeURIComponent(db)));
   return w.m.session.redirect(w, '/server');
 }

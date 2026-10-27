@@ -41,7 +41,16 @@ function poolFor(session) {
 
 async function ping(session) {
   const conn = await mysql.createConnection(baseCfg(session));
-  try { await conn.query('SELECT 1'); } finally { await conn.end(); }
+  try {
+    await conn.query('SELECT 1');
+    try {
+      const [rows] = await conn.query('SELECT VERSION() AS v');
+      const v = String((rows && rows[0] && rows[0].v) || '');
+      session.mariaFlavor = /mariadb/i.test(v) ? 'mariadb' : 'mysql';
+    } catch (e) {
+      session.mariaFlavor = 'mariadb';
+    }
+  } finally { await conn.end(); }
   return true;
 }
 

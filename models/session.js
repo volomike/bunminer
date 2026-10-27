@@ -89,6 +89,9 @@ function start(w, data) {
     dbpass: data.dbpass || '',   // DB password — never written to disk or any cookie
     db: data.db || null,         // selected database name (MariaDB/PG) or file path (SQLite)
     schema: data.schema || null, // PostgreSQL current schema
+    platform: data.platform || data.engine || '',
+    host: data.host || '',
+    mariaFlavor: data.mariaFlavor || null,
     csrf: newId(),
     history: [],
     permanent: !!data.permanent,
