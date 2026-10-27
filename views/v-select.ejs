@@ -6,8 +6,8 @@
   <% if (!isSqlite) { %><input type="hidden" name="db" value="<%= VIEW.db %>"><% } %>
   <% if (isPg) { %><input type="hidden" name="schema" value="<%= VIEW.schema %>"><% } %>
   <input type="hidden" name="table" value="<%= VIEW.table %>">
-  <input type="text" name="where" class="form-control form-control-sm mr-2" placeholder="WHERE" value="<%= VIEW.where %>">
-  <input type="text" name="order" class="form-control form-control-sm mr-2" placeholder="ORDER BY (e.g. id ASC, name DESC)" value="<%= VIEW.order %>">
+  <input type="text" name="where" class="form-control form-control-sm mr-2 sql-input" style="width:50%" placeholder="WHERE" value="<%= VIEW.where %>">
+  <input type="text" name="order" class="form-control form-control-sm mr-2 sql-input" style="flex:1 1 auto" placeholder="ORDER BY (e.g. id ASC, name DESC)" value="<%= VIEW.order %>">
   <select name="limit" class="custom-select custom-select-sm mr-2">
     <% VIEW.limitOptions.forEach(n => { %><option value="<%= n %>" <%= VIEW.limit===n?'selected':'' %>><%= n %></option><% }) %>
   </select>

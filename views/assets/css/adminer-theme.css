@@ -60,3 +60,4 @@ h3 { font-size:14px; color:#333; margin:18px 0 8px; }
 .btn-primary { background-color: var(--accent); border-color: var(--accent); }
 .btn-primary:hover { background-color: #005f5f; border-color: #005f5f; }
 .form-control, .form-control-sm { font-size:13px; }
+.sql-input { font-family: Consolas, Menlo, "SF Mono", "Ubuntu Sans Mono", "Ubuntu Mono", "DejaVu Sans Mono", monospace; font-size:12px; }
