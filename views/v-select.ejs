@@ -78,11 +78,13 @@
 
 <div class="pagination">
   <% if (VIEW.offset > 0) { %>
+    <a href="<%= VIEW.q('/select', { db: VIEW.db, table: VIEW.table, schema: VIEW.schema, where: VIEW.where, order: VIEW.order, limit: VIEW.limit, offset: 0 }) %>">first</a>
     <a href="<%= VIEW.q('/select', { db: VIEW.db, table: VIEW.table, schema: VIEW.schema, where: VIEW.where, order: VIEW.order, limit: VIEW.limit, offset: Math.max(0, VIEW.offset - VIEW.limit) }) %>">prev</a>
   <% } %>
   <span>rows <%= VIEW.offset + 1 %>–<%= Math.min(VIEW.offset + VIEW.limit, VIEW.total) %> of <%= VIEW.total %></span>
   <% if (VIEW.offset + VIEW.limit < VIEW.total) { %>
     <a href="<%= VIEW.q('/select', { db: VIEW.db, table: VIEW.table, schema: VIEW.schema, where: VIEW.where, order: VIEW.order, limit: VIEW.limit, offset: VIEW.offset + VIEW.limit }) %>">next</a>
+    <a href="<%= VIEW.q('/select', { db: VIEW.db, table: VIEW.table, schema: VIEW.schema, where: VIEW.where, order: VIEW.order, limit: VIEW.limit, offset: Math.floor((VIEW.total - 1) / VIEW.limit) * VIEW.limit }) %>">last</a>
   <% } %>
 </div>
 <%- await include('v-FOOT.ejs'); %>
