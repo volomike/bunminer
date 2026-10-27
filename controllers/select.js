@@ -28,6 +28,8 @@ export default async function({ w, VIEW }) {
   VIEW.offset = offset;
   VIEW.limitOptions = ALLOWED_LIMITS;
   VIEW.selKey = 'dbxadm2.sel.' + encodeURIComponent(db + '|' + table);
+  VIEW.draftKey = 'dbxadm2.draft.' + encodeURIComponent(db + '|' + table);
+  VIEW.back = w.m.fmt.url(s, '/select', { db, table, schema, where, order, limit, offset });
   VIEW.q = (path, o) => w.m.fmt.url(s, path, o);
 
   // sort state for column headers (first column + direction of the ORDER BY value)
@@ -62,6 +64,7 @@ export default async function({ w, VIEW }) {
       const editObj = { db, table, schema };
       const keyParams = new URLSearchParams();
       for (const p of pk) { keyParams.append(p.col, String(p.val)); editObj['where[' + p.col + ']'] = p.val; }
+      editObj['back'] = VIEW.back;
       return {
         cells: columns.map(c => w.m.fmt.cell(r[c])),
         editUrl: selectable ? w.m.fmt.url(s, '/edit', editObj) : null,

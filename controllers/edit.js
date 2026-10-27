@@ -16,6 +16,8 @@ export default async function({ w, VIEW }) {
   VIEW.schema = schema;
   VIEW.q = (path, o) => w.m.fmt.url(s, path, o);
   VIEW.mode = 'edit';
+  const back = w.get.back || '';
+  VIEW.returnUrl = (back.startsWith('/') && !back.startsWith('//')) ? back : w.m.fmt.url(s, '/select', { db, table, schema });
 
   try {
     const info = await adapter.columns(s, ns, table);

@@ -129,6 +129,32 @@
     });
   });
 
+  // Restore/persist field drafts so Edit → Save/Cancel returns to the same inputs
+  $(function () {
+    var $sql = $('textarea[name="sql"]');
+    if ($sql.length) {
+      var sd = localStorage.getItem('dbxadm2.sqldraft');
+      if (sd !== null) $sql.val(sd);
+      $sql.on('input', function () { try { localStorage.setItem('dbxadm2.sqldraft', this.value); } catch (e) {} });
+    }
+    var $dk = $('#draft-key');
+    if ($dk.length) {
+      var dk = $dk.val();
+      var $where = $('input[name="where"]');
+      var $order = $('input[name="order"]');
+      if ($where.length) {
+        var wd = localStorage.getItem(dk + '.where');
+        if (wd !== null) $where.val(wd);
+        $where.on('input', function () { try { localStorage.setItem(dk + '.where', this.value); } catch (e) {} });
+      }
+      if ($order.length) {
+        var od = localStorage.getItem(dk + '.order');
+        if (od !== null) $order.val(od);
+        $order.on('input', function () { try { localStorage.setItem(dk + '.order', this.value); } catch (e) {} });
+      }
+    }
+  });
+
   // Create-table form: add/remove column rows
   $(document).on('click', '#add-col', function () {
     var idx = $('#cols-rows tr[data-col]').length;

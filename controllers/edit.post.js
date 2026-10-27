@@ -25,5 +25,6 @@ export default async function({ w }) {
   }
   const values = fieldValues(w.post);
   await adapter.update(s, ns, table, values, pkCols, pkVals);
-  return w.doRedirect(w.m.fmt.url(s, '/select', { db, table, schema }));
+  const back = w.post['back'] || '';
+  return w.doRedirect((back.startsWith('/') && !back.startsWith('//')) ? back : w.m.fmt.url(s, '/select', { db, table, schema }));
 }

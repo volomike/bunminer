@@ -27,6 +27,7 @@ export default async function({ w, VIEW }) {
     VIEW.offset = offset;
     VIEW.limitOptions = ALLOWED_LIMITS;
     VIEW.selKey = 'dbxadm2.sqsel.' + res.qid;
+    const back = '/sql?' + new URLSearchParams({ limit: String(limit), offset: String(offset) }).toString();
     VIEW.rows = res.rows.slice(offset, offset + limit).map(r => {
       const keyParams = new URLSearchParams();
       const editObj = { db: res.db, table: res.table, schema: res.schema };
@@ -34,6 +35,7 @@ export default async function({ w, VIEW }) {
         keyParams.append(c, String(r[c]));
         editObj['where[' + c + ']'] = r[c];
       }
+      editObj['back'] = back;
       return {
         cells: res.columns.map(c => w.m.fmt.cell(r[c])),
         key: keyParams.toString(),
