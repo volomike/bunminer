@@ -32,9 +32,9 @@
     <% if (isMar) { %><th></th><% } %>
     <th>Name</th><th>Type</th><th>Nullable</th><th>Default</th><th>Extra</th><th></th>
   </tr></thead>
-  <tbody <%= isMar ? 'id="cols-sort"' : '' %>>
+  <tbody<%- isMar ? ' id="cols-sort"' : '' %>>
   <% (VIEW.info.cols||[]).forEach(c => { %>
-    <tr <%= isMar ? `data-name="${c.name}"` : '' %>>
+    <tr<%- isMar ? ` data-name="${c.name}"` : '' %>>
       <% if (isMar) { %><td class="sort-handle dim" style="cursor:move">⠿</td><% } %>
       <td><%= c.name %></td>
       <td><%= c.type %></td>
