@@ -37,6 +37,7 @@ export default async function({ w, VIEW }) {
   let username = srv.user || '';
   let dbpass = '';
   let db = '';
+  let host = srv.host || '';
 
   if (srv.engine === 'sqlite') {
     db = (w.post['server'] || '').trim();
@@ -45,10 +46,13 @@ export default async function({ w, VIEW }) {
     username = usernameRaw || srv.user;
     dbpass = w.post['password'] || '';
     db = (w.post['db'] || '').trim();
+    // The "Server" field is a host override for network engines (defaults to the configured server host).
+    const hostField = (w.post['server'] || '').trim();
+    if (hostField) host = hostField;
   }
 
   const permanent = ['1', 'on', 'true'].includes(String(w.post['permanent'] || ''));
-  const probe = { engine: srv.engine, serverId: srv.id, username, dbpass, db: db || undefined };
+  const probe = { engine: srv.engine, serverId: srv.id, username, dbpass, db: db || undefined, host };
 
   try {
     await adapter.ping(probe);
@@ -63,7 +67,7 @@ export default async function({ w, VIEW }) {
   const platform = srv.engine === 'maria'
     ? (probe.mariaFlavor === 'mysql' ? 'MySQL' : 'MariaDB')
     : srv.engine === 'pgsql' ? 'PostgreSQL' : 'SQLite';
-  w.m.session.start(w, { engine: srv.engine, serverId: srv.id, username, dbpass, db: db || null, permanent, platform, host: srv.host || '', mariaFlavor: probe.mariaFlavor || null });
+  w.m.session.start(w, { engine: srv.engine, serverId: srv.id, username, dbpass, db: db || null, permanent, platform, host, mariaFlavor: probe.mariaFlavor || null });
   if (db) return w.m.session.redirect(w, '/db' + (srv.engine === 'sqlite' ? '' : '?db=' + encodeURIComponent(db)));
   return w.m.session.redirect(w, '/server');
 }
