@@ -91,6 +91,7 @@ function start(w, data) {
     schema: data.schema || null, // PostgreSQL current schema
     platform: data.platform || data.engine || '',
     host: data.host || '',
+    port: data.port || null,
     mariaFlavor: data.mariaFlavor || null,
     csrf: newId(),
     history: [],

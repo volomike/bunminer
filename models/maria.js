@@ -8,7 +8,7 @@ function serverCfg(session) {
   const srv = (globalThis.w.config.servers || []).find(x => x.id === session.serverId) || {};
   return {
     host: session.host || srv.host || '127.0.0.1',
-    port: srv.port || 3306,
+    port: session.port || srv.port || 3306,
     user: session.username || srv.user || 'root',
   };
 }
