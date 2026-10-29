@@ -424,15 +424,23 @@ async function editColumn(session, db, table, oldName, c) {
 
 async function reorderColumns(session, db, table, order) {
   const pool = poolFor(session);
-  const info = await columns(session, db, table);
-  const byName = Object.fromEntries(info.cols.map(x => [x.name, x]));
+  const [ddlRows] = await pool.query(`SHOW CREATE TABLE ${ident(db)}.${ident(table)}`);
+  const createSql = ddlRows && ddlRows[0] ? Object.values(ddlRows[0])[1] : '';
+  if (!createSql) throw new Error('Could not read table definition');
+  // Rebuild each column's FULL definition from SHOW CREATE TABLE so we preserve charset,
+  // collation, default, comment, and every other attribute exactly. Reconstructing from
+  // information_schema.COLUMNS would double-quote already-quoted string defaults (e.g. a
+  // varchar default of 'PC' -> "Invalid default value") and drop per-column charset/collation.
+  const defs = new Map();
+  for (const raw of createSql.split('\n')) {
+    const line = raw.trim();
+    const m = line.match(/^`([^`]+)`\s+(.+)$/);
+    if (!m) continue;
+    defs.set(m[1], `\`${m[1]}\` ${m[2].replace(/,\s*$/, '')}`);
+  }
   const clauses = order.map((name, i) => {
-    const c = byName[name];
-    if (!c) throw new Error('Unknown column: ' + name);
-    let def = `${ident(c.name)} ${c.type}`;
-    def += String(c.nullable).toLowerCase() === 'yes' ? ' NULL' : ' NOT NULL';
-    if (c.def !== null && c.def !== undefined && c.def !== '') def += ` DEFAULT ${defLiteral(c.def)}`;
-    if ((c.extra || '').toLowerCase().includes('auto_increment')) def += ' AUTO_INCREMENT';
+    const def = defs.get(name);
+    if (!def) throw new Error('Unknown column: ' + name);
     return `MODIFY COLUMN ${def} ${i === 0 ? 'FIRST' : `AFTER ${ident(order[i - 1])}`}`;
   });
   await pool.query(`ALTER TABLE ${ident(db)}.${ident(table)} ${clauses.join(', ')}`);
