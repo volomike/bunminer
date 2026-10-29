@@ -1,3 +1,12 @@
+// Parse "host" or "host:port" from the Server field. A bare host keeps the platform default port.
+function parseHostPort(s) {
+  const i = s.lastIndexOf(':');
+  if (i > 0 && /^\d+$/.test(s.slice(i + 1))) {
+    return { host: s.slice(0, i), port: parseInt(s.slice(i + 1), 10) };
+  }
+  return { host: s, port: null };
+}
+
 export default async function({ w, VIEW }) {
   const driver = w.post['driver'] || 'maria';
   const srv = w.config.servers.find(x => x.id === driver) || w.config.servers[0];
@@ -38,6 +47,7 @@ export default async function({ w, VIEW }) {
   let dbpass = '';
   let db = '';
   let host = srv.host || '';
+  let port = srv.port || '';
 
   if (srv.engine === 'sqlite') {
     db = (w.post['server'] || '').trim();
@@ -46,13 +56,17 @@ export default async function({ w, VIEW }) {
     username = usernameRaw || srv.user;
     dbpass = w.post['password'] || '';
     db = (w.post['db'] || '').trim();
-    // The "Server" field is a host override for network engines (defaults to the configured server host).
+    // The "Server" field accepts "host" or "host:port"; defaults to the configured host + platform port.
     const hostField = (w.post['server'] || '').trim();
-    if (hostField) host = hostField;
+    if (hostField) {
+      const parsed = parseHostPort(hostField);
+      host = parsed.host || host;
+      if (parsed.port) port = parsed.port;
+    }
   }
 
   const permanent = ['1', 'on', 'true'].includes(String(w.post['permanent'] || ''));
-  const probe = { engine: srv.engine, serverId: srv.id, username, dbpass, db: db || undefined, host };
+  const probe = { engine: srv.engine, serverId: srv.id, username, dbpass, db: db || undefined, host, port };
 
   try {
     await adapter.ping(probe);
@@ -67,7 +81,7 @@ export default async function({ w, VIEW }) {
   const platform = srv.engine === 'maria'
     ? (probe.mariaFlavor === 'mysql' ? 'MySQL' : 'MariaDB')
     : srv.engine === 'pgsql' ? 'PostgreSQL' : 'SQLite';
-  w.m.session.start(w, { engine: srv.engine, serverId: srv.id, username, dbpass, db: db || null, permanent, platform, host, mariaFlavor: probe.mariaFlavor || null });
+  w.m.session.start(w, { engine: srv.engine, serverId: srv.id, username, dbpass, db: db || null, permanent, platform, host, port, mariaFlavor: probe.mariaFlavor || null });
   if (db) return w.m.session.redirect(w, '/db' + (srv.engine === 'sqlite' ? '' : '?db=' + encodeURIComponent(db)));
   return w.m.session.redirect(w, '/server');
 }

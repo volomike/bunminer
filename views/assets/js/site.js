@@ -22,6 +22,8 @@
         var isSqlite = $driver.val() === 'sqlite';
         $('#fld-username, #fld-password, #fld-db').toggle(!isSqlite);
         $('#fld-server label').text(isSqlite ? 'SQLite file path' : 'Server');
+        var port = $driver.find('option:selected').attr('data-port') || '';
+        $('#fld-server input').attr('placeholder', isSqlite ? '/path/to/database.sqlite' : 'localhost:' + port);
       };
       $driver.on('change', loginDriver);
       loginDriver();
