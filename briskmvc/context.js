@@ -14,7 +14,11 @@ try {
   CORDOVA_VERSION = 'dev';
 }
 
-const sessionStore = new Map();
+// Session store disabled 2026-11-02: this Map was never evicted (one permanent
+// entry per unique sid) and nothing in the app reads w.session. It drove the
+// process toward the 2 GB MemoryHigh ceiling under sustained traffic. Kept,
+// commented, for reference.
+// const sessionStore = new Map();
 
 function computeBaseUrl(request) {
     const h = request.headers;
@@ -98,9 +102,12 @@ export async function buildContext(
 
     const incomingCookies = parseCookies(request.headers.get('cookie'));
     let sid = incomingCookies.sid || crypto.randomUUID();
-    const isNewSession = !sessionStore.has(sid);
-    if (isNewSession) sessionStore.set(sid, {});
-    const session = sessionStore.get(sid);
+    // const isNewSession = !sessionStore.has(sid);
+    // if (isNewSession) sessionStore.set(sid, {});
+    // const session = sessionStore.get(sid);
+    // No-op session object: w.session stays defined for any future caller, but
+    // nothing is retained between requests.
+    const session = {};
 
     // Always ensure sid is set (new or refresh)
     // Keep this early append for session continuity; note: don't also push sid into cookieBuffer unless you intend to overwrite it later.
