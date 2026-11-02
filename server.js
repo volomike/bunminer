@@ -1,4 +1,4 @@
-// BunDB Panel — server bootstrap (BriskMVC), bound to loopback (nginx is the only entry point)
+// Bunminer — server bootstrap (BriskMVC), bound to loopback (nginx is the only entry point)
 import { loadConfig } from './briskmvc/config.js';
 import { createElysia } from './briskmvc/elysia.js';
 import { setupStatic } from './briskmvc/static.js';
@@ -33,4 +33,4 @@ app.all('*', () => new Response(
 
 const PORT = parseInt(process.env.PORT, 10) || 3070;
 app.listen({ port: PORT, hostname: '127.0.0.1' });
-console.log(`BunDB Panel listening on 127.0.0.1:${PORT}`);
+console.log(`Bunminer listening on 127.0.0.1:${PORT}`);
