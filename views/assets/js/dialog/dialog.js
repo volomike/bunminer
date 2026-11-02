@@ -1,5 +1,5 @@
 /**
- * BunDB Panel Dialog — native <dialog> confirm/alert/danger, ported from Cordoba.
+ * Bunminer Dialog — native <dialog> confirm/alert/danger, ported from Cordoba.
  * danger() adds a "Yes — do it" checkbox gate: the red button stays disabled
  * until the checkbox is ticked, so destructive actions need two explicit steps.
  */

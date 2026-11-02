@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title><%= VIEW.title %> - BunDB Panel</title>
+  <title><%= VIEW.title %> - Bunminer</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
   <link rel="stylesheet" href="/assets/css/adminer-theme.css?r=<%= VIEW.RANDOMID %>">
   <link rel="stylesheet" href="/assets/js/dialog/dialog.css?r=<%= VIEW.RANDOMID %>">
@@ -12,7 +12,7 @@
 </head>
 <body>
 <header class="adminer-header">
-  <h1>BunDB Panel <small>v<%= VIEW.CORDOVA_VERSION %></small></h1>
+  <h1>Bunminer <small>v<%= VIEW.CORDOVA_VERSION %></small></h1>
   <div class="adminer-user">
     <% if (VIEW.session) { %>
       <span><%= VIEW.session.platform || VIEW.session.engine %> · <%= VIEW.session.username || 'sqlite' %><% if (VIEW.session.host) { %> @ <%= VIEW.session.host %><% } %></span>

@@ -1,7 +1,7 @@
 {
   "port": 3070,
   "VERSION": "0.1.0",
-  "site": { "title": "BunDB Panel", "hostname": "dbxadm2.dpro.io" },
+  "site": { "title": "Bunminer", "hostname": "dbxadm2.dpro.io" },
   "servers": [
     { "id": "maria", "label": "MariaDB/MySQL", "engine": "maria", "host": "127.0.0.1", "port": 3306, "user": "root" },
     { "id": "pgsql", "label": "PostgreSQL", "engine": "pgsql", "host": "127.0.0.1", "port": 5432, "user": "postgres" },
