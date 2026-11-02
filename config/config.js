@@ -6,6 +6,21 @@
     { "id": "pgsql", "label": "PostgreSQL", "engine": "pgsql", "host": "127.0.0.1", "port": 5432, "user": "postgres" },
     { "id": "sqlite", "label": "SQLite", "engine": "sqlite" }
   ],
+  // ---------------------------------------------------------------------------
+  // trustProxyHeaders
+  //
+  // Bunminer cannot assume it runs behind a proxy, so forwarded headers
+  // (X-Forwarded-For, CF-Connecting-IP) are NOT trusted by default — the login
+  // rate limiter keys on the real socket address instead, so clients cannot
+  // spoof those headers to dodge per-IP limits.
+  //
+  // Set this to true ONLY when the app is reachable exclusively through a
+  // trusted reverse proxy (nginx, Cloudflare, ...) whose forwarded headers
+  // clients cannot forge — i.e. the origin is firewalled to the proxy's IPs.
+  // Without that firewall, enabling this lets attackers rotate the header and
+  // evade rate limiting.
+  // ---------------------------------------------------------------------------
+  "trustProxyHeaders": false,
   "sess": { "idleSec": 900, "absoluteSec": 28800, "permanentSec": 604800, "cookie": "bunminer_sid" },
   // ---------------------------------------------------------------------------
   // SQLite support
