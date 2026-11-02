@@ -3,7 +3,7 @@ import path from 'path';
 export function startServer(app, { BASEPATH }) {
   const PORT = parseInt(process.env.PORT, 10) || 3000;
 
-  app.listen({ port: PORT });
+  app.listen({ port: PORT, hostname: '127.0.0.1' });
   
   // ANSI TERMINAL CODES
   const CLRSCN = "\x1b[2J\x1b[H";
