@@ -7,11 +7,11 @@ function parseHostPort(s) {
   return { host: s, port: null };
 }
 
-export default async function({ w, VIEW }) {
+export default async function({ w, VIEW, server }) {
   const driver = w.post['driver'] || 'maria';
   const srv = w.config.servers.find(x => x.id === driver) || w.config.servers[0];
   const adapter = w.m[srv.engine];
-  const ip = w.m.guard.clientIp(w);
+  const ip = w.m.guard.clientIp(w, server);
   const usernameRaw = (w.post['username'] || '').trim();
   const userKey = srv.engine === 'sqlite' ? '' : (usernameRaw || srv.user || '');
 

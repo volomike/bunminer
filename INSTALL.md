@@ -137,6 +137,11 @@ Then `sudo nginx -t && sudo systemctl reload nginx`.
   no credentials; when enabled, paths are confined to `sqlite.allowedDirs` (default
   `/opt/datastores`, symlink-resolved) so one engine cannot be used to open arbitrary files
   on the server.
+- **Forwarded headers are not trusted by default** (`trustProxyHeaders: false`): the login
+  rate limiter keys on the real socket address, so spoofed `X-Forwarded-For` /
+  `CF-Connecting-IP` headers cannot dodge it. If the app is reachable *only* through a
+  trusted proxy (origin firewalled to the proxy's IPs), set `trustProxyHeaders: true` in
+  `config/config.js` to rate-limit on true per-client IPs.
 - **No Cloudflare (or any CDN) required.** The app's own defenses (rate-limited login,
   CSRF, signed sessions, SQLite path gate) work with or without a proxy in front. If you do
   run Cloudflare or a similar proxy, use its extra features (edge rate limits, managed
