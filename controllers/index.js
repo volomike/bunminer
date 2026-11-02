@@ -3,6 +3,7 @@ export default async function({ w, VIEW }) {
   if (s) return w.doRedirect('/server');
   VIEW.title = 'Login';
   VIEW.servers = w.config.servers;
+  VIEW.sqliteEnabled = !!(w.config.sqlite && w.config.sqlite.enabled === true);
   VIEW.error = '';
   VIEW.driver = 'maria';
   VIEW.username = '';
