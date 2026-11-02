@@ -1,11 +1,11 @@
-# BunDB Panel — FORTIFICATION.md
+# Bunminer — FORTIFICATION.md
 
 > **Status: planning document.** The fortifications below are written down, not implemented.
 > Only the items listed under "Already in place" are live today. Reading this file changes nothing.
 
 ## Purpose
 
-BunDB Panel is a web-based database manager (MariaDB, PostgreSQL, SQLite) built on BunJS/BriskMVC.
+Bunminer is a web-based database manager (MariaDB, PostgreSQL, SQLite) built on BunJS/BriskMVC.
 It is a high-power tool by design: one successful login can read, write, or destroy an entire
 database. If this panel is exposed to the public internet it *will* be found by scanners and
 actively attacked. This document collects the fortifications that would make attackers severely
@@ -297,7 +297,7 @@ The panel's safety cannot exceed the DB servers' own configuration. Independent 
 - **No state changes via GET** — every destructive/mutating route is POST-only (`/delete`,
   `/drop`, `/processlist`, `/privileges`, `/edit`, `/insert`, `/select-action`). Keep it that
   way; CSRF tokens only protect POSTs.
-- **Framework `sid` cookie** — BriskMVC also sets its own `sid` cookie; it is unused by BunDB
+- **Framework `sid` cookie** — BriskMVC also sets its own `sid` cookie; it is unused by Bunminer
   Panel and harmless, but confirm it carries Secure/HttpOnly on the public host during the
   hardening pass.
 - **Rate-limit counters are per-process** — a restart clears them. Acceptable for a single
