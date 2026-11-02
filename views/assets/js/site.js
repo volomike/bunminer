@@ -20,10 +20,15 @@
     if ($driver.length) {
       var loginDriver = function () {
         var isSqlite = $driver.val() === 'sqlite';
+        var sqliteEnabled = $driver.find('option:selected').data('enabled') === true;
+        var sqliteOff = isSqlite && !sqliteEnabled;
+        $('#sqlite-disabled-note').toggle(sqliteOff);
         $('#fld-username, #fld-password, #fld-db').toggle(!isSqlite);
+        $('#fld-server').toggle(!sqliteOff);
         $('#fld-server label').text(isSqlite ? 'SQLite file path' : 'Server');
         var port = $driver.find('option:selected').attr('data-port') || '';
         $('#fld-server input').attr('placeholder', isSqlite ? '/path/to/database.sqlite' : 'localhost:' + port);
+        $('button[type="submit"]').prop('disabled', sqliteOff);
       };
       $driver.on('change', loginDriver);
       loginDriver();
