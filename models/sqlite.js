@@ -1,10 +1,35 @@
 // models/sqlite.js — SQLite adapter (bun:sqlite). Session.db holds the file path.
+// SQLite files carry no credentials of their own, so this adapter is gated by
+// config.sqlite.enabled plus an allowed-directory allowlist (see pathError()).
 
 import { Database } from 'bun:sqlite';
+import { realpathSync } from 'node:fs';
+import path from 'node:path';
+
+// Validate a SQLite file path against the config gate. Returns an error-message
+// string, or null when the path is allowed. Symlinks are resolved before the
+// directory check, so a link inside the allowlist cannot point outside it.
+function pathError(file) {
+  const cfg = globalThis.w.config.sqlite || {};
+  if (cfg.enabled !== true) {
+    return 'SQLite support is disabled in this configuration. Set sqlite.enabled to true in config/config.js to enable it.';
+  }
+  if (!file) return 'No database file selected';
+  const allowed = (cfg.allowedDirs || []).map(x => String(x)).filter(Boolean);
+  let real;
+  try { real = realpathSync(file); } catch (e) { real = path.resolve(file); }
+  for (const dir of allowed) {
+    let rdir;
+    try { rdir = realpathSync(dir); } catch (e) { rdir = path.resolve(dir); }
+    if (real === rdir || real.startsWith(rdir + path.sep)) return null;
+  }
+  return 'SQLite database file must reside in an allowed directory';
+}
 
 function open(session) {
   const path = session.db;
-  if (!path) throw new Error('No database file selected');
+  const err = pathError(path);
+  if (err) throw new Error(err);
   const cfg = globalThis.w.config.sqlite || {};
   const readonly = cfg.defaultReadonly === true;
   const db = new Database(path, { readonly, create: false });
@@ -330,7 +355,7 @@ async function pks(session, _schema, table, where) {
 }
 
 export default {
-  ping, close, databases, tables, columns, rows, rowByPk, insert, update, remove,
+  pathError, ping, close, databases, tables, columns, rows, rowByPk, insert, update, remove,
   execute, explain, dump, importSql, blob, dropTable, truncate, exportRows,
   createTable, addColumn, dropColumn, editColumn,
   createIndex, dropIndex, renameIndex,

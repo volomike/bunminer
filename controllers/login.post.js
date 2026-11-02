@@ -18,6 +18,7 @@ export default async function({ w, VIEW }) {
   const fail = async (msg, opts = {}) => {
     VIEW.title = 'Login';
     VIEW.servers = w.config.servers;
+    VIEW.sqliteEnabled = !!(w.config.sqlite && w.config.sqlite.enabled === true);
     VIEW.error = msg;
     VIEW.driver = driver;
     VIEW.username = opts.username !== undefined ? opts.username : usernameRaw;
@@ -52,6 +53,9 @@ export default async function({ w, VIEW }) {
   if (srv.engine === 'sqlite') {
     db = (w.post['server'] || '').trim();
     if (!db) return await fail('Please provide the SQLite file path.');
+    // SQLite has no credentials of its own — gate it on config (enabled + allowedDirs).
+    const perr = adapter.pathError ? adapter.pathError(db) : null;
+    if (perr) return await fail(perr);
   } else {
     username = usernameRaw || srv.user;
     dbpass = w.post['password'] || '';
