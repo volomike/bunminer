@@ -1,6 +1,6 @@
 {
-  "name": "bundb-panel",
-  "description": "BunDB Panel — a database manager in BunJS (with a nod to Adminer)",
+  "name": "bunminer",
+  "description": "Bunminer — a database manager in BunJS (with a nod to Adminer)",
   "version": "0.1.0",
   "type": "module",
   "private": true,
