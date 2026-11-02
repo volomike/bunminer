@@ -1,5 +1,4 @@
 {
-  "port": 3070,
   "VERSION": "0.1.0",
   "site": { "title": "Bunminer", "hostname": "dbxadm2.dpro.io" },
   "servers": [
