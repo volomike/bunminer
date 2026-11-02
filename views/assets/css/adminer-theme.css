@@ -46,8 +46,9 @@ code, pre { font-family: Consolas, Menlo, "SF Mono", "Ubuntu Sans Mono", "Ubuntu
 code { font-size:12px; }
 pre { font-size:12px; white-space:pre-wrap; }
 
-.login-page { display:flex; align-items:center; justify-content:center; min-height:100vh; background:#f5f5f5; }
+.login-page { display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:100vh; background:#f5f5f5; }
 .login-page .adminer-footer { position:fixed; bottom:0; left:0; right:0; background:#f5f5f5; }
+.login-page #sqlite-disabled-note { width:100%; max-width:540px; margin-bottom:14px; }
 .hp-field { position:absolute; left:-9999px; width:1px; height:1px; overflow:hidden; }
 .login-box { width:340px; background:#fff; border:1px solid var(--border); padding:22px; }
 .login-logo { margin:0 0 18px; font-size:26px; color:var(--accent); font-weight:normal; }

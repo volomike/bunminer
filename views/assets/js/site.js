@@ -23,6 +23,7 @@
         var sqliteEnabled = $driver.find('option:selected').data('enabled') === true;
         var sqliteOff = isSqlite && !sqliteEnabled;
         $('#sqlite-disabled-note').toggle(sqliteOff);
+        $('.login-box .adminer-error').toggle(!sqliteOff);
         $('#fld-username, #fld-password, #fld-db').toggle(!isSqlite);
         $('#fld-server').toggle(!sqliteOff);
         $('#fld-server label').text(isSqlite ? 'SQLite file path' : 'Server');
