@@ -45,7 +45,11 @@ async function runAutoRequest(w, VIEW, BASEPATH, cookie) {
             '_autorequest.js',
         );
         if (!fs.existsSync(autoRequestPath)) return;
-        const mod = await import(autoRequestPath + `?t=${Date.now()}`);
+                const mtimeMs = fs.statSync(autoRequestPath).mtimeMs;
+        if (runAutoRequest.__cache?.path !== autoRequestPath || runAutoRequest.__cache.mtimeMs !== mtimeMs) {
+            runAutoRequest.__cache = { path: autoRequestPath, mtimeMs, mod: await import(`${autoRequestPath}?v=${mtimeMs}`) };
+        }
+        const mod = runAutoRequest.__cache.mod;
         if (mod?.default) await mod.default({ w, VIEW, cookie });
     } catch (err) {
         console.error('AUTOREQUEST ERROR:', err);

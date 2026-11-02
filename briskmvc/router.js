@@ -2,6 +2,25 @@ import fs from 'fs';
 import path from 'path';
 import { buildContext } from './context.js';
 
+const routeModuleCache = new Map(); // controller file -> { mtimeMs, mod }
+
+// Cache-bust only when the controller file actually changes. A per-request
+// ?t=Date.now() specifier makes Bun retain a new module record for every
+// request, so the module registry grows without bound.
+async function loadRouteModule(full) {
+	let mtimeMs = 0;
+	try {
+		mtimeMs = fs.statSync(full).mtimeMs;
+	} catch {
+		return await import(full);
+	}
+	const hit = routeModuleCache.get(full);
+	if (hit && hit.mtimeMs === mtimeMs) return hit.mod;
+	const mod = await import(`${full}?v=${mtimeMs}`);
+	routeModuleCache.set(full, { mtimeMs, mod });
+	return mod;
+}
+
 function fileToRoute(filePath, controllersDir) {
 	const rel = path.relative(controllersDir, filePath).replace(/\\/g, '/');
 	let noExt = rel.replace(/\.js$/, '');
@@ -51,7 +70,7 @@ export function loadRoutes(app, { BASEPATH }) {
 		// parse:none so Elysia never consumes the request body — context.js handles all parsing
 		const routeOpts = (method === 'POST' || method === 'PUT') ? { parse: "none" } : undefined;
 		register(routePath, async ctx => {
-		const mod = await import(full + `?t=${Date.now()}`);
+		const mod = await loadRouteModule(full);
 		const handler = mod.default;
 
 		const headers = new Headers();
