@@ -6,7 +6,7 @@
     { "id": "pgsql", "label": "PostgreSQL", "engine": "pgsql", "host": "127.0.0.1", "port": 5432, "user": "postgres" },
     { "id": "sqlite", "label": "SQLite", "engine": "sqlite" }
   ],
-  "sess": { "idleSec": 900, "absoluteSec": 28800, "permanentSec": 604800, "cookie": "dbxadm2_sid" },
+  "sess": { "idleSec": 900, "absoluteSec": 28800, "permanentSec": 604800, "cookie": "bunminer_sid" },
   "sqlite": { "defaultReadonly": false },
   "import": { "maxBytes": 268435456, "timeoutSec": 600 },
   "SHOW_FULL_ERRORS": false
