@@ -50,6 +50,14 @@ Edit `config/config.js` → `servers`. Each entry is `{ id, label, engine, host,
 At login you can override the host and port (e.g. `dbserver:3307`) in the **Server** field;
 when omitted, the platform default port is used (3306 for MariaDB/MySQL, 5432 for PostgreSQL).
 
+#### SQLite is gated by default
+
+SQLite files have no password of their own, so the engine ships **disabled**
+(`sqlite.enabled: false` in `config/config.js`). The login page shows a "disabled" notice
+until you enable it. When enabled, a database file may only be opened if its
+symlink-resolved path lives under a directory listed in `sqlite.allowedDirs`
+(default `/opt/datastores`) — edit the list to fit your server layout.
+
 ### systemd service
 
 The app's listen **port comes from systemd** (`Environment=PORT=…`), not from the config file.
@@ -86,8 +94,10 @@ The service binds to `127.0.0.1` only — nginx is the only public entry point.
 
 ### nginx reverse proxy
 
-Create a vhost that proxies to the Bun service. This example uses Cloudflare Flexible SSL
-(origin on plain HTTP):
+Create a vhost that proxies to the Bun service. The origin listens on plain HTTP, so
+you bring your own TLS termination: either a CDN/proxy in front (e.g. Cloudflare Full
+TLS) or nginx itself with a certificate. Without TLS you should only ever run this on
+a trusted network:
 
 ```nginx
 server {
@@ -123,6 +133,14 @@ Then `sudo nginx -t && sudo systemctl reload nginx`.
   `*.log`, `*.pem`, `*.key`, and `*.crt`.
 - **`data/secret.key`** is generated on first run and signs session cookies. It is
   per-installation — never copy it between installs or commit it.
+- **SQLite is disabled by default** (`sqlite.enabled: false`) because SQLite files carry
+  no credentials; when enabled, paths are confined to `sqlite.allowedDirs` (default
+  `/opt/datastores`, symlink-resolved) so one engine cannot be used to open arbitrary files
+  on the server.
+- **No Cloudflare (or any CDN) required.** The app's own defenses (rate-limited login,
+  CSRF, signed sessions, SQLite path gate) work with or without a proxy in front. If you do
+  run Cloudflare or a similar proxy, use its extra features (edge rate limits, managed
+  challenges, mTLS, TLS termination) as an added layer — not a requirement.
 - The service binds to loopback; expose it only through a hardened reverse proxy.
 - See `FORTIFICATION.md` for the full threat model and hardening notes.
 

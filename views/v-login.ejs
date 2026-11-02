@@ -18,9 +18,12 @@
         <label for="driver">System</label>
         <select name="driver" id="driver" class="custom-select">
           <% VIEW.servers.forEach(sv => { %>
-            <option value="<%= sv.id %>" data-port="<%= sv.port || '' %>" <%= sv.id === VIEW.driver ? 'selected' : '' %>><%= sv.label %></option>
+            <option value="<%= sv.id %>" data-port="<%= sv.port || '' %>" data-enabled="<%= (sv.engine !== 'sqlite' || VIEW.sqliteEnabled) ? 'true' : 'false' %>" <%= sv.id === VIEW.driver ? 'selected' : '' %>><%= sv.label %></option>
           <% }) %>
         </select>
+      </div>
+      <div class="adminer-error" id="sqlite-disabled-note" style="display:none">
+        SQLite support is disabled in this configuration. To enable it, set <code>sqlite.enabled</code> to <code>true</code> in <code>config/config.js</code>.
       </div>
       <div class="form-group" id="fld-server">
         <label>Server</label>
