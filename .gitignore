@@ -4,3 +4,10 @@ other/
 *.sqlite
 *.sqlite3
 *.db
+.env
+.env.*
+*.log
+*.pem
+*.key
+*.crt
+backups/
