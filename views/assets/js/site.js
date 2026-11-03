@@ -66,6 +66,18 @@
     });
   });
 
+  // Destructive-SQL confirmation (matches the server-side VIEW.warn regex)
+  $(document).on('submit', 'form[action="/sql"]', function (e) {
+    var $form = $(this);
+    var sql = ($form.find('textarea[name="sql"]').val() || '').trim();
+    if (/^\s*(drop|truncate|delete|alter|rename|create)\b/i.test(sql)) {
+      e.preventDefault();
+      Cordoba.danger('This statement is destructive — it can drop, truncate, rebuild or delete data. Continue?', 'Are you sure?').then(function (ok) {
+        if (ok) $form[0].submit();
+      });
+    }
+  });
+
   // Row checkbox selection (persists across pages)
   $(document).on('change', '.row-sel', function () {
     if (isAll()) return;
