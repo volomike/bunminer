@@ -15,7 +15,7 @@ function newId() {
 }
 
 function cookieName(w) {
-  return (w.config && w.config.sess && w.config.sess.cookie) || 'bunminer_sid';
+  return (w.config && w.config.sess && w.config.sess.cookie) || '__Host-bunminer_sid';
 }
 
 function parseCookies(header) {

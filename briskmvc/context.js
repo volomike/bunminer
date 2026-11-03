@@ -113,7 +113,7 @@ export async function buildContext(
     // Keep this early append for session continuity; note: don't also push sid into cookieBuffer unless you intend to overwrite it later.
     headers.append(
         'Set-Cookie',
-        `sid=${sid}; Path=/; HttpOnly; SameSite=Lax`,
+        `sid=${sid}; Path=/; HttpOnly; Secure; SameSite=Lax`,
     );
 
     let post = {};
