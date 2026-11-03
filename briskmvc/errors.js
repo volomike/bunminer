@@ -1,6 +1,7 @@
 import { loadConfig } from './config.js';
 import ejs from 'ejs';
 import path from 'path';
+import fmt from '../models/fmt.js';
 
 export function createErrorHandler({ BASEPATH } = {}) {
   if (!BASEPATH) {
@@ -41,7 +42,9 @@ export function createErrorHandler({ BASEPATH } = {}) {
 
     const url = request?.url || error?.requestUrl || 'unknown';
 
-    console.error('ERROR:', error, 'URL:', url);
+    // Log a credential-scrubbed error (passwords in failed SQL must never hit the log).
+    const errText = error && typeof error === 'object' ? (error.message || error.stack || String(error)) : String(error);
+    console.error('ERROR:', fmt.redactSecrets(errText), 'URL:', url);
 
     let html;
 

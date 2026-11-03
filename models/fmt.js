@@ -83,4 +83,19 @@ function url(s, path, obj) {
   return qs ? path + '?' + qs : path;
 }
 
-export default { cell, toInput, editableCols, isLong, bytes, isBlob, blobBytes, url };
+// Mask credential-bearing SQL values (IDENTIFIED BY 'x', PASSWORD 'x',
+// SET PASSWORD = 'x', etc.) so they never appear in history or logs.
+function redactSecrets(sql) {
+  const s = String(sql || '');
+  const Q = "(?:'[^']*'|\"[^\"]*\"|[^\\s,;]+)";
+  const rules = [
+    [`\\b(identified\\s+by)(?:\\s+password)?\\s+${Q}`, '$1 ***'],
+    [`\\b(password)(\\s+for\\s+${Q}\\s*)?\\s*=\\s*${Q}`, '$1=***'],
+    [`\\b(password)\\s+${Q}`, '$1 ***'],
+  ];
+  let out = s;
+  for (const [pat, rep] of rules) out = out.replace(new RegExp(pat, 'gi'), rep);
+  return out;
+}
+
+export default { cell, toInput, editableCols, isLong, bytes, isBlob, blobBytes, url, redactSecrets };
