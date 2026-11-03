@@ -1,7 +1,8 @@
-export default async function({ w }) {
+export default async function({ w, server }) {
   const s = w.m.session.current(w);
   if (!s) return w.doRedirect('/');
   if (w.post['csrf'] !== s.csrf) return w.doRedirect('/');
+  const ip = w.m.guard.clientIp(w, server);
   const adapter = w.m[s.engine];
   const db = s.engine === 'sqlite' ? (s.db || '') : (w.post['db'] || s.db || '');
   const schema = s.engine === 'pgsql' ? (w.post['schema'] || s.schema || 'public') : db;
@@ -9,6 +10,8 @@ export default async function({ w }) {
   const dataOnly = w.post['data'] === '1';
   const gzip = w.post['gzip'] === '1';
   const tables = Object.entries(w.post).filter(([k]) => k.startsWith('t[')).map(([k]) => k.slice(2, -1));
+
+  w.m.audit.log('export', { ip, db, tables: tables.join(','), structureOnly, dataOnly });
 
   let bytes;
   if (s.engine === 'sqlite') {

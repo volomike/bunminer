@@ -12,10 +12,11 @@ function parseSimpleSelect(sql) {
   return { table };
 }
 
-export default async function({ w, VIEW }) {
+export default async function({ w, VIEW, server }) {
   const s = w.m.session.current(w);
   if (!s) return w.doRedirect('/');
   if (w.post['csrf'] !== s.csrf) return w.doRedirect('/');
+  const ip = w.m.guard.clientIp(w, server);
   const adapter = w.m[s.engine];
   const db = s.engine === 'sqlite' ? (s.db || '') : (w.post['db'] || s.db || '');
   const schema = s.engine === 'pgsql' ? (w.post['schema'] || s.schema || 'public') : db;
@@ -34,6 +35,7 @@ export default async function({ w, VIEW }) {
   s.history = s.history || [];
   s.history.push({ sql: w.m.fmt.redactSecrets(sql), time: Date.now() });
   if (s.history.length > 100) s.history = s.history.slice(-100);
+  w.m.audit.log('sql', { ip, db, schema, sql: w.m.fmt.redactSecrets(sql), explain });
 
   // Try to turn a single-table SELECT into a paginated, selectable grid.
   if (!explain) {
