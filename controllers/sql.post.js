@@ -32,7 +32,7 @@ export default async function({ w, VIEW }) {
   }
 
   s.history = s.history || [];
-  s.history.push({ sql, time: Date.now() });
+  s.history.push({ sql: w.m.fmt.redactSecrets(sql), time: Date.now() });
   if (s.history.length > 100) s.history = s.history.slice(-100);
 
   // Try to turn a single-table SELECT into a paginated, selectable grid.
