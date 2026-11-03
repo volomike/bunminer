@@ -16,6 +16,7 @@ export default async function({ w, VIEW, server }) {
   const userKey = srv.engine === 'sqlite' ? '' : (usernameRaw || srv.user || '');
 
   const fail = async (msg, opts = {}) => {
+    w.m.audit.log('login_failed', { ip, user: userKey || '', engine: srv.engine });
     VIEW.title = 'Login';
     VIEW.servers = w.config.servers;
     VIEW.sqliteEnabled = !!(w.config.sqlite && w.config.sqlite.enabled === true);
@@ -82,6 +83,7 @@ export default async function({ w, VIEW, server }) {
   }
 
   w.m.guard.success(ip, userKey);
+  w.m.audit.log('login_success', { ip, user: username, engine: srv.engine });
   const platform = srv.engine === 'maria'
     ? (probe.mariaFlavor === 'mysql' ? 'MySQL' : 'MariaDB')
     : srv.engine === 'pgsql' ? 'PostgreSQL' : 'SQLite';

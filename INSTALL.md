@@ -147,6 +147,9 @@ Then `sudo nginx -t && sudo systemctl reload nginx`.
   run Cloudflare or a similar proxy, use its extra features (edge rate limits, managed
   challenges, mTLS, TLS termination) as an added layer — not a requirement.
 - The service binds to loopback; expose it only through a hardened reverse proxy.
+- **Audit log.** Logins, SQL statements (credential-scrubbed), and exports are appended to
+  `/var/log/bunminer/audit.log` (JSONL) and self-rotated (size-capped, oldest N kept). Ensure
+  the service user can create that directory: `mkdir -p /var/log/bunminer && chown www-data:www-data /var/log/bunminer`.
 - See `FORTIFICATION.md` for the full threat model and hardening notes.
 
 ## License
