@@ -53,5 +53,17 @@
     "maxDecompressedBytes": 1073741824,
     "timeoutSec": 600
   },
+  // ---------------------------------------------------------------------------
+  // Audit log
+  //
+  // Security-relevant events (logins, SQL statements, exports) are appended to
+  // a JSONL file and self-rotated (size-capped, oldest N kept). Defaults below
+  // write to /var/log/bunminer — the service user must be able to create it.
+  // ---------------------------------------------------------------------------
+  "audit": {
+    "dir": "/var/log/bunminer",
+    "maxBytes": 5242880,
+    "keep": 5
+  },
   "SHOW_FULL_ERRORS": false
 }
