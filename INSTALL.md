@@ -125,6 +125,23 @@ server {
 
 Then `sudo nginx -t && sudo systemctl reload nginx`.
 
+### TLS (encryption)
+
+"TLS termination" just means: something has to encrypt the connection between the browser
+and the server, because Bunminer itself serves plain HTTP on `127.0.0.1` (loopback). The
+session cookie is `Secure`, so it is only sent over HTTPS — effectively, HTTPS is required.
+Cloudflare is **optional, not assumed**.
+
+1. **Self-hosted TLS (recommended default).** Put a certificate on nginx with Let's Encrypt:
+   ```bash
+   sudo apt install certbot python3-certbot-nginx
+   sudo certbot --nginx -d db.example.com
+   ```
+   certbot adds `listen 443 ssl;` and the `ssl_certificate*` lines to the vhost for you.
+2. **CDN/proxy TLS.** If you run Cloudflare (or similar) in front, use its **Full (strict)**
+   TLS so the browser→proxy hop is encrypted. This is an extra layer — the app's own
+   defenses do not depend on it.
+
 ## Security
 
 - **No credentials in the repo.** Database passwords are entered at login and held in memory.
