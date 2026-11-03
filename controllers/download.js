@@ -1,3 +1,7 @@
+// Hard cap on a single cell/download size — a multi-GB BLOB must not be pulled
+// through the app into memory per request.
+const MAX_BLOB_BYTES = 64 * 1024 * 1024;
+
 export default async function({ w }) {
   const s = w.m.session.current(w);
   if (!s) return w.doRedirect('/');
@@ -25,6 +29,11 @@ export default async function({ w }) {
   else if (val instanceof Uint8Array) bytes = val;
   else if (typeof Buffer !== 'undefined' && Buffer.isBuffer(val)) bytes = new Uint8Array(val);
   else { bytes = new TextEncoder().encode(String(val)); isText = true; }
+
+  const size = bytes.byteLength !== undefined ? bytes.byteLength : bytes.length;
+  if (size > MAX_BLOB_BYTES) {
+    return new Response('Blob too large to download', { status: 413, headers: { 'Content-Type': 'text/plain' } });
+  }
 
   const name = `${table}.${col}.bin`;
   return new Response(bytes, {
