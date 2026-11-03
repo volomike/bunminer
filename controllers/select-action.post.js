@@ -1,7 +1,8 @@
-export default async function({ w }) {
+export default async function({ w, server }) {
   const s = w.m.session.current(w);
   if (!s) return w.doRedirect('/');
   if (w.post['csrf'] !== s.csrf) return w.doRedirect('/');
+  const ip = w.m.guard.clientIp(w, server);
   const adapter = w.m[s.engine];
   const db = s.engine === 'sqlite' ? (s.db || '') : (w.post['db'] || s.db || '');
   const table = w.post['table'] || '';
@@ -10,6 +11,8 @@ export default async function({ w }) {
   const action = w.post['action'] || 'delete';
   const all = w.post['all'] === '1';
   const where = (w.post['where'] || '').trim();
+
+  w.m.audit.log('bulk', { ip, db, table, action, all });
 
   if (all) {
     if (action === 'export') {
