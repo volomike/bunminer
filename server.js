@@ -8,6 +8,11 @@ import { loadRoutes } from './briskmvc/router.js';
 const BASEPATH = import.meta.dir;
 const CONFIG = loadConfig({ BASEPATH });
 
+// Loud startup warning: full error output leaks stack traces and SQL to users.
+if (CONFIG.SHOW_FULL_ERRORS) {
+  console.warn('[SECURITY] SHOW_FULL_ERRORS is true — error pages will reveal stack traces and SQL. Set it to false in production.');
+}
+
 const app = createElysia({ BASEPATH });
 
 // Security headers on every response (hardening pass)
