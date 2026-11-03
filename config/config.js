@@ -40,6 +40,18 @@
     "allowedDirs": [ "/opt/datastores" ],
     "defaultReadonly": false
   },
-  "import": { "maxBytes": 268435456, "timeoutSec": 600 },
+  // ---------------------------------------------------------------------------
+  // Import limits
+  //
+  // "maxBytes":             hard cap on the uploaded file size (bytes).
+  // "maxDecompressedBytes": cap on the size after .gz decompression — prevents
+  //                         "zip bombs" from exhausting memory.
+  // "timeoutSec":           reserved for import timeout (not yet enforced).
+  // ---------------------------------------------------------------------------
+  "import": {
+    "maxBytes": 268435456,
+    "maxDecompressedBytes": 1073741824,
+    "timeoutSec": 600
+  },
   "SHOW_FULL_ERRORS": false
 }
