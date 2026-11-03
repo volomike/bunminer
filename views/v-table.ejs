@@ -1,5 +1,6 @@
 <%- await include('v-HEAD.ejs'); %>
 <% var isPg = VIEW.session.engine === 'pgsql'; var isSqlite = VIEW.session.engine === 'sqlite'; var isMar = VIEW.session.engine === 'maria'; %>
+<% function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); } %>
 <h2>Structure: <%= VIEW.table %></h2>
 
 <p class="mb-3">
@@ -34,7 +35,7 @@
   </tr></thead>
   <tbody<%- isMar ? ' id="cols-sort"' : '' %>>
   <% (VIEW.info.cols||[]).forEach(c => { %>
-    <tr<%- isMar ? ` data-name="${c.name}"` : '' %>>
+    <tr<%- isMar ? ` data-name="${esc(c.name)}"` : '' %>>
       <% if (isMar) { %><td class="sort-handle dim" style="cursor:move">⠿</td><% } %>
       <td><%= c.name %></td>
       <td><%= c.type %></td>
