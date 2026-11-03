@@ -19,6 +19,7 @@ a:visited { color: var(--accent); }
 .adminer-menu a { margin-right:16px; font-size:13px; }
 .adminer-menu .adminer-db { font-weight:bold; color:#555; margin-right:16px; font-size:13px; }
 .adminer-menu a.right { float:right; margin-right:0; }
+.adminer-menu form.right { float:right; margin-right:0; }
 
 .adminer-content { padding:14px; }
 .adminer-error { background:#fff0f0; border:1px solid #ffbbb0; color:#b00; padding:8px 10px; margin-bottom:12px; white-space:pre-wrap; }

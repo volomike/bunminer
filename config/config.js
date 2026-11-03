@@ -21,7 +21,7 @@
   // evade rate limiting.
   // ---------------------------------------------------------------------------
   "trustProxyHeaders": false,
-  "sess": { "idleSec": 900, "absoluteSec": 28800, "permanentSec": 604800, "cookie": "bunminer_sid" },
+  "sess": { "idleSec": 900, "absoluteSec": 28800, "permanentSec": 604800, "cookie": "__Host-bunminer_sid" },
   // ---------------------------------------------------------------------------
   // SQLite support
   //

@@ -44,7 +44,10 @@
     <a href="/types">Types</a>
   <% } %>
   <a href="/history">History</a>
-  <a href="/logout" class="right">Logout</a>
+  <form method="post" action="/logout" class="right">
+    <input type="hidden" name="csrf" value="<%= VIEW.session.csrf %>">
+    <button type="submit" class="btn btn-link p-0">Logout</button>
+  </form>
 </nav>
 <div class="adminer-content">
 <% if (VIEW.error) { %><div class="adminer-error"><%= VIEW.error %></div><% } %>
