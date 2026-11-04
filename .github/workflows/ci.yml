@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies (frozen lockfile)
+        run: bun install --frozen-lockfile
+
+      - name: Audit dependencies (CVEs)
+        run: bun audit
+
+      - name: Scan for hardcoded secrets
+        run: |
+          # Looks for obvious credential assignments in code (not in docs/views/config).
+          if git grep -nIE \
+            "(api[_-]?key|secret|passwd|password|token|private[_-]?key)[[:space:]]*[:=][[:space:]]*['\"][^'\"]{6,}['\"]" \
+            -- ':!*.md' ':!config/config.js' ':!views/' ':!LICENSE' ':!INSTALL.md'; then
+            echo "::error::Possible hardcoded secret detected (see lines above)"
+            exit 1
+          fi
+          echo "no obvious hardcoded secrets"
+
+      - name: Syntax check (server, controllers, models)
+        run: |
+          for f in server.js controllers/*.js controllers/api/*.js models/*.js; do
+            [ -f "$f" ] || continue
+            bun build --no-bundle "$f" >/dev/null || { echo "::error::syntax error in $f"; exit 1; }
+          done
+          echo "syntax ok"
