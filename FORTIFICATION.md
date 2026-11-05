@@ -139,6 +139,21 @@ as the highest-value target on the host.
 1. **SQL injection:** queries are already parameterized. Make it enforced: a CI grep/semgrep rule
    that fails on string-built SQL (`` pool.query(`...${``), and keep `multipleStatements` off the
    shared pool — the SQL box already uses a dedicated connection.
+
+   **Identifiers vs. values** — bound parameters (`?` / `$n`) protect *values*, but table and
+   column names cannot be parameterized: they are part of the query structure and must be
+   quoted. Bunminer routes every identifier through an engine-specific `ident()` helper that
+   doubles the quote character, so reserved words and embedded quotes can't break out:
+
+   ```text
+   MariaDB             ident("order")  →  `order`     (backticks; backticks doubled)
+   MariaDB             ident("a`b")    →  `a``b`
+   PostgreSQL / SQLite ident("order")  →  "order"     (double quotes; doubled)
+   PostgreSQL / SQLite ident('a"b')    →  "a""b"
+   ```
+
+   Column/table names in the user-management and create-table paths are additionally validated
+   against a regex whitelist before they reach `ident()`.
 2. **XSS:** EJS escapes by default. Audit every `<%-` (intentionally-raw) usage. Move any inline
    `<script>` blocks into static files so a strict CSP can be applied (this also matters for
    open-source: contributors must not add inline JS).
