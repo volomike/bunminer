@@ -6,6 +6,8 @@ A fast, modern, self-hosted **database manager** for **MariaDB/MySQL**, **Postgr
 Bunminer is the "as close and easy as Adminer" tool for the Bun/Node ecosystem: browse, query,
 import/export, and administer your databases from a clean web UI — **with zero PHP**.
 
+![Bunminer browsing the publishers table](docs/screenshot.png)
+
 ## What it can do
 
 - Browse **databases, tables, columns, indexes, and foreign keys**.
