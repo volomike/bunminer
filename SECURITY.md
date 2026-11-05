@@ -13,8 +13,7 @@ Preferred channel — **GitHub private vulnerability reporting**:
 1. Open the repository → **Security** tab → **Advisories** → **Report a vulnerability**.
 2. Describe the issue, the affected version, and steps to reproduce.
 
-Fallback email: **`security@example.com`** *(replace with a real address — we keep the
-primary channel as GitHub's private reporting so no email infrastructure is required).*
+Fallback email: **volomike@gmail.com**.
 
 ## What to expect
 
